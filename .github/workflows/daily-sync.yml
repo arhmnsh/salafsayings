@@ -1,0 +1,43 @@
+name: Daily Salaf Sayings Sync
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "15 2 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Update Sayings
+        run: npm run salaf:update
+
+      - name: Commit Changes
+        run: |
+          if git diff --quiet -- content/salafsayings.json; then
+            echo "No new sayings."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add content/salafsayings.json
+          git commit -m "chore: daily sync salaf sayings"
+          git push
