@@ -202,8 +202,7 @@ const dragOffset = ref(0)
 const isDragging = ref(false)
 const isSettling = ref(false)
 const isTeleporting = ref(false)
-const activeScrollable = ref<HTMLElement | null>(null)
-const innerScrollActive = ref(false)
+const pageScrollActive = ref(false)
 const wheelReleaseTimer = ref<ReturnType<typeof setTimeout> | null>(null)
 const GESTURE_THRESHOLD = 90
 const GESTURE_MAX_OFFSET = 180
@@ -225,16 +224,13 @@ const cardMotionClass = computed(() =>
   isDragging.value || isTeleporting.value ? '' : 'transition-transform duration-260 ease-out'
 )
 
-const findScrollableContainer = (target: EventTarget | null) => {
-  const el = target as HTMLElement | null
-  return el?.closest('[data-quote-scroll]') as HTMLElement | null
-}
-
-const canScrollInDirection = (el: HTMLElement, deltaY: number) => {
-  const maxScrollTop = el.scrollHeight - el.clientHeight
-  if (maxScrollTop <= 0) return false
-  if (deltaY > 0) return el.scrollTop < maxScrollTop - 1
-  if (deltaY < 0) return el.scrollTop > 1
+const canScrollPageInDirection = (deltaY: number) => {
+  if (!import.meta.client) return false
+  const scrollY = window.scrollY
+  const doc = document.documentElement
+  const maxScroll = Math.max(0, doc.scrollHeight - window.innerHeight)
+  if (deltaY > 0) return scrollY < maxScroll - 1
+  if (deltaY < 0) return scrollY > 1
   return false
 }
 const getRouteIdForItem = (item: any) => String(item?.id || item?.slug || '')
@@ -258,6 +254,9 @@ const move = (dir: 1 | -1) => {
   const nextIndex = activeIndex.value + dir
   if (nextIndex < 0 || nextIndex >= filteredSayings.value.length) return
   activeIndex.value = nextIndex
+  if (import.meta.client) {
+    window.scrollTo({ top: 0, behavior: 'auto' })
+  }
 }
 
 const nextFrame = () => new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
@@ -318,8 +317,7 @@ const onWheel = (event: WheelEvent) => {
   showShareMenu.value = false
   if (isSettling.value) return
   if (Math.abs(event.deltaY) < 2) return
-  const scrollable = findScrollableContainer(event.target)
-  if (scrollable && canScrollInDirection(scrollable, event.deltaY)) {
+  if (canScrollPageInDirection(event.deltaY)) {
     return
   }
 
@@ -343,8 +341,7 @@ const onTouchStart = (event: TouchEvent) => {
   showShareMenu.value = false
   if (isSettling.value) return
   touchStartY.value = event.touches[0]?.clientY ?? null
-  activeScrollable.value = findScrollableContainer(event.target)
-  innerScrollActive.value = false
+  pageScrollActive.value = false
   isDragging.value = true
 }
 
@@ -353,8 +350,8 @@ const onTouchMove = (event: TouchEvent) => {
   const currentY = event.touches[0]?.clientY ?? touchStartY.value
   const delta = currentY - touchStartY.value
   const intendedScrollDelta = -delta
-  if (activeScrollable.value && canScrollInDirection(activeScrollable.value, intendedScrollDelta)) {
-    innerScrollActive.value = true
+  if (canScrollPageInDirection(intendedScrollDelta)) {
+    pageScrollActive.value = true
     isDragging.value = false
     dragOffset.value = 0
     return
@@ -364,10 +361,9 @@ const onTouchMove = (event: TouchEvent) => {
 
 const onTouchEnd = (event: TouchEvent) => {
   if (touchStartY.value === null || isSettling.value) return
-  if (innerScrollActive.value) {
+  if (pageScrollActive.value) {
     touchStartY.value = null
-    activeScrollable.value = null
-    innerScrollActive.value = false
+    pageScrollActive.value = false
     dragOffset.value = 0
     isDragging.value = false
     return
@@ -377,8 +373,7 @@ const onTouchEnd = (event: TouchEvent) => {
   dragOffset.value = Math.max(-GESTURE_MAX_OFFSET, Math.min(GESTURE_MAX_OFFSET, delta))
   finishGesture()
   touchStartY.value = null
-  activeScrollable.value = null
-  innerScrollActive.value = false
+  pageScrollActive.value = false
 }
 
 const shuffle = () => {
@@ -887,7 +882,7 @@ watch(draftInput, () => {
 
 <template>
   <div
-    class="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_20%_20%,rgba(245,158,11,0.14),transparent_40%),radial-gradient(circle_at_80%_80%,rgba(14,165,233,0.12),transparent_38%),linear-gradient(145deg,#09090b,#111827_45%,#1f2937)] text-white"
+    class="relative min-h-screen overflow-x-hidden bg-[radial-gradient(circle_at_20%_20%,rgba(245,158,11,0.14),transparent_40%),radial-gradient(circle_at_80%_80%,rgba(14,165,233,0.12),transparent_38%),linear-gradient(145deg,#09090b,#111827_45%,#1f2937)] text-white"
     @wheel.passive="onWheel"
     @touchstart.passive="onTouchStart"
     @touchmove.passive="onTouchMove"
@@ -895,50 +890,59 @@ watch(draftInput, () => {
   >
     <div class="pointer-events-none absolute inset-0 bg-[linear-gradient(0deg,rgba(17,24,39,0.9),rgba(17,24,39,0.18)_45%,rgba(17,24,39,0.9))]" />
 
-    <header class="relative z-20 flex items-center justify-between px-5 py-4 sm:px-8">
-      <div>
-        <p class="font-mono text-xs uppercase tracking-[0.2em] text-white/70">Salaf Sayings</p>
-      </div>
-      <div class="flex items-center gap-2">
-        <button
-          class="rounded-full border border-white/20 bg-black/30 p-2 text-white/90 transition hover:bg-black/55"
-          @click="showSearchPopup = true"
+    <Teleport to="body">
+      <div class="fixed inset-x-0 top-0 z-40 pointer-events-none">
+        <header class="pointer-events-auto flex items-center justify-between bg-[linear-gradient(180deg,rgba(9,9,11,0.95),rgba(9,9,11,0.65),transparent)] px-5 py-4 backdrop-blur-sm sm:px-8">
+          <div>
+            <p class="font-mono text-xs uppercase tracking-[0.2em] text-white/70">Salaf Sayings</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button
+              class="rounded-full border border-white/20 bg-black/30 p-2 text-white/90 transition hover:bg-black/55"
+              @click="showSearchPopup = true"
+            >
+              <Search class="h-4 w-4" />
+            </button>
+            <div class="rounded-full border border-white/20 bg-black/20 px-3 py-1 font-mono text-xs text-white/80">
+              {{ progressLabel }}
+            </div>
+          </div>
+        </header>
+        <div
+          v-if="activeFilterItems.length"
+          class="pointer-events-auto bg-[linear-gradient(180deg,rgba(9,9,11,0.92),rgba(9,9,11,0.48),transparent)] px-5 pb-2 backdrop-blur-sm sm:px-8"
         >
-          <Search class="h-4 w-4" />
-        </button>
-        <div class="rounded-full border border-white/20 bg-black/20 px-3 py-1 font-mono text-xs text-white/80">
-          {{ progressLabel }}
+          <div class="flex flex-wrap gap-2">
+            <button
+              v-for="item in activeFilterItems"
+              :key="`active-filter-${item.index}-${item.token.value}`"
+              type="button"
+              class="inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs transition"
+              :class="item.token.type === 'tag'
+                ? 'border-amber-200/60 bg-amber-200/20 text-amber-100 hover:bg-amber-200/30'
+                : 'border-sky-200/50 bg-sky-200/15 text-sky-100 hover:bg-sky-200/25'"
+              @click="removeTokenAt(item.index)"
+            >
+              <Hash v-if="item.token.type === 'tag'" class="h-3 w-3" />
+              <Search v-else class="h-3 w-3" />
+              {{ item.token.value }}
+              <span class="ml-1 text-[11px] opacity-80">×</span>
+            </button>
+          </div>
         </div>
       </div>
-    </header>
-    <div v-if="activeFilterItems.length" class="relative z-20 px-5 pb-2 sm:px-8">
-      <div class="flex flex-wrap gap-2">
-        <button
-          v-for="item in activeFilterItems"
-          :key="`active-filter-${item.index}-${item.token.value}`"
-          type="button"
-          class="inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs transition"
-          :class="item.token.type === 'tag'
-            ? 'border-amber-200/60 bg-amber-200/20 text-amber-100 hover:bg-amber-200/30'
-            : 'border-sky-200/50 bg-sky-200/15 text-sky-100 hover:bg-sky-200/25'"
-          @click="removeTokenAt(item.index)"
-        >
-          <Hash v-if="item.token.type === 'tag'" class="h-3 w-3" />
-          <Search v-else class="h-3 w-3" />
-          {{ item.token.value }}
-          <span class="ml-1 text-[11px] opacity-80">×</span>
-        </button>
-      </div>
-    </div>
+    </Teleport>
 
-    <main class="relative z-10 flex min-h-[calc(100vh-5rem)] items-start justify-center px-5 pb-24 sm:px-8">
+    <main
+      class="relative z-10 flex min-h-[calc(100vh-5rem)] items-start justify-center px-5 pb-24 sm:px-8"
+      :class="activeFilterItems.length ? 'pt-28' : 'pt-20'"
+    >
       <div class="w-full max-w-4xl">
         <div :class="cardMotionClass" :style="cardStyle">
           <article
             v-if="current"
             :key="current.id"
-            data-quote-scroll
-            class="w-full max-h-[calc(100vh-11rem)] overflow-y-auto rounded-3xl border border-white/20 bg-black/35 p-7 shadow-2xl backdrop-blur-xl sm:p-10"
+            class="w-full rounded-3xl border border-white/20 bg-black/35 p-7 shadow-2xl backdrop-blur-xl sm:p-10"
           >
             <p v-if="current.intro" class="mb-5 font-sans text-sm leading-relaxed text-white/70 sm:text-base">
               {{ current.intro }}

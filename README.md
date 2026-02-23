@@ -24,3 +24,13 @@ npm run salaf:update
 ## Daily Job
 
 Workflow file: `.github/workflows/daily-sync.yml`
+
+## Deployment
+
+GitHub Pages deploy workflow: `.github/workflows/deploy.yml`
+
+This deploys on push to `main` and publishes `.output/public`.
+
+Custom domain is configured with `public/CNAME`:
+
+`salafsayings.arhmn.sh`
