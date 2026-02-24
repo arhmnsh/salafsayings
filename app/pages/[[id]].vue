@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ChevronDown, ChevronUp, Copy, Hash, Image, Link2, Search, Share2, Shuffle } from 'lucide-vue-next'
+import { AlertTriangle, Bookmark, BookmarkCheck, ChevronDown, ChevronUp, Copy, Hash, Image, Link2, Search, Share2, Shuffle } from 'lucide-vue-next'
 import QRCode from 'qrcode'
 
 definePageMeta({ layout: false, key: 'salafsayings-feed' })
@@ -20,6 +20,7 @@ type QueryToken = {
   value: string
   normalized?: string
 }
+type ViewMode = 'all' | 'bookmarks'
 
 const normalizeTagText = (value: string) =>
   value
@@ -41,6 +42,8 @@ const allTags = computed(() => {
 })
 
 const queryTokens = ref<QueryToken[]>([])
+const viewMode = ref<ViewMode>('all')
+const bookmarkedIds = ref<string[]>([])
 const draftInput = ref('')
 const searchInput = ref<HTMLInputElement | null>(null)
 const suggestionIndex = ref(0)
@@ -50,6 +53,7 @@ const allTagsByNormalized = computed(() =>
 const selectedTagSet = computed(() =>
   new Set(queryTokens.value.filter(t => t.type === 'tag').map(t => t.normalized || ''))
 )
+const bookmarkedSet = computed(() => new Set(bookmarkedIds.value))
 const activeFilterItems = computed(() =>
   queryTokens.value
     .map((token, index) => ({ token, index }))
@@ -174,7 +178,7 @@ const filteredSayings = computed(() => {
   }
   validGroups = validGroups.filter(group => group.length > 0)
 
-  return sayings.value.filter((item: any) => {
+  const searchableSayings = sayings.value.filter((item: any) => {
     const topicSet = new Set((item.topics || []).map((topic: string) => normalizeTagText(topic)))
     const haystack = normalizeTagText(
       [item.quote, item.intro, item.author, item.source, item.title, ...(item.topics || [])]
@@ -186,6 +190,9 @@ const filteredSayings = computed(() => {
     const tagMatches = !tagTokens.length || validGroups.some(group => group.every(term => topicSet.has(term)))
     return textMatches && tagMatches
   })
+
+  if (viewMode.value === 'all') return searchableSayings
+  return searchableSayings.filter(item => bookmarkedSet.value.has(getRouteIdForItem(item)))
 })
 
 const activeIndex = ref(0)
@@ -222,6 +229,9 @@ const cardStyle = computed(() => {
 })
 const cardMotionClass = computed(() =>
   isDragging.value || isTeleporting.value ? '' : 'transition-transform duration-260 ease-out'
+)
+const isCurrentBookmarked = computed(() =>
+  current.value ? bookmarkedSet.value.has(getRouteIdForItem(current.value)) : false
 )
 
 const canScrollPageInDirection = (deltaY: number) => {
@@ -384,6 +394,17 @@ const shuffle = () => {
     nextIndex = Math.floor(Math.random() * filteredSayings.value.length)
   }
   activeIndex.value = nextIndex
+}
+
+const toggleBookmarkCurrent = () => {
+  if (!current.value) return
+  const id = getRouteIdForItem(current.value)
+  if (!id) return
+  if (bookmarkedSet.value.has(id)) {
+    bookmarkedIds.value = bookmarkedIds.value.filter(existing => existing !== id)
+    return
+  }
+  bookmarkedIds.value = [...bookmarkedIds.value, id]
 }
 
 const copyCurrent = async () => {
@@ -735,6 +756,38 @@ const copyCurrentLink = async () => {
   }
 }
 
+const reportCurrent = () => {
+  if (!current.value || !import.meta.client) return
+  showShareMenu.value = false
+  const quoteUrl = getPublicQuoteUrl(current.value)
+  const id = getRouteIdForItem(current.value) || 'unknown'
+  const nav = window.navigator
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Unknown'
+  const subject = `[Salaf Sayings] Issue report for quote ${id}`
+  const body = [
+    'Please write the issue details below this line:',
+    '',
+    '[Your comments]',
+    '',
+    '----',
+    'Auto-collected details:',
+    `Post URL: ${quoteUrl}`,
+    `Post ID: ${id}`,
+    `Post Author: ${current.value.author || 'Unknown'}`,
+    `Page URL: ${window.location.href}`,
+    `Time (ISO): ${new Date().toISOString()}`,
+    `Timezone: ${timezone}`,
+    `Browser (UA): ${nav.userAgent || 'Unknown'}`,
+    `Platform: ${nav.platform || 'Unknown'}`,
+    `Language: ${nav.language || 'Unknown'}`,
+    `Viewport: ${window.innerWidth}x${window.innerHeight}`,
+    `Screen: ${window.screen.width}x${window.screen.height}`,
+    `Pixel ratio: ${window.devicePixelRatio || 1}`,
+    `Touch points: ${nav.maxTouchPoints || 0}`
+  ].join('\n')
+  window.location.href = `mailto:hi@arhmn.sh?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+}
+
 const toggleTag = (tag: string) => {
   const normalized = normalizeTagText(tag)
   const exists = queryTokens.value.some(token => token.type === 'tag' && token.normalized === normalized)
@@ -836,6 +889,18 @@ watch(activeIndex, () => {
 })
 
 onMounted(() => {
+  const storedBookmarks = localStorage.getItem('salafsayings-bookmarks')
+  if (storedBookmarks) {
+    try {
+      const parsed = JSON.parse(storedBookmarks)
+      if (Array.isArray(parsed)) {
+        bookmarkedIds.value = parsed.map(item => String(item)).filter(Boolean)
+      }
+    } catch {
+      // Ignore invalid bookmark payload.
+    }
+  }
+
   const firstVisitKey = 'salafsayings-swipe-hint-seen'
   if (!localStorage.getItem(firstVisitKey)) {
     showFirstVisitHint.value = true
@@ -878,6 +943,11 @@ watch(showShareMenu, (isOpen) => {
 watch(draftInput, () => {
   suggestionIndex.value = 0
 })
+
+watch(bookmarkedIds, (next) => {
+  if (!import.meta.client) return
+  localStorage.setItem('salafsayings-bookmarks', JSON.stringify(next))
+})
 </script>
 
 <template>
@@ -898,12 +968,21 @@ watch(draftInput, () => {
           </div>
           <div class="flex items-center gap-2">
             <button
+              class="rounded-full border p-2 transition"
+              :class="viewMode === 'bookmarks'
+                ? 'border-amber-200/70 bg-amber-200/20 text-amber-100 hover:bg-amber-200/30'
+                : 'border-white/20 bg-black/30 text-white/90 hover:bg-black/55'"
+              @click="viewMode = viewMode === 'all' ? 'bookmarks' : 'all'"
+            >
+              <BookmarkCheck class="h-4 w-4" />
+            </button>
+            <button
               class="rounded-full border border-white/20 bg-black/30 p-2 text-white/90 transition hover:bg-black/55"
               @click="showSearchPopup = true"
             >
               <Search class="h-4 w-4" />
             </button>
-            <div class="rounded-full border border-white/20 bg-black/20 px-3 py-1 font-mono text-xs text-white/80">
+            <div class="min-w-[6.5rem] rounded-full border border-white/20 bg-black/20 px-3 py-1 text-center font-mono text-xs tabular-nums text-white/80">
               {{ progressLabel }}
             </div>
           </div>
@@ -930,12 +1009,20 @@ watch(draftInput, () => {
             </button>
           </div>
         </div>
+        <div
+          v-if="viewMode === 'bookmarks'"
+          class="pointer-events-none px-5 pb-2 sm:px-8"
+        >
+          <span class="inline-flex rounded-full border border-amber-200/60 bg-amber-200/20 px-3 py-1 text-xs text-amber-100">
+            Showing bookmarked posts ({{ bookmarkedIds.length }})
+          </span>
+        </div>
       </div>
     </Teleport>
 
     <main
       class="relative z-10 flex min-h-[calc(100vh-5rem)] items-start justify-center px-5 pb-24 sm:px-8"
-      :class="activeFilterItems.length ? 'pt-28' : 'pt-20'"
+      :class="activeFilterItems.length ? 'pt-32' : 'pt-24'"
     >
       <div class="w-full max-w-4xl">
         <div :class="cardMotionClass" :style="cardStyle">
@@ -975,7 +1062,9 @@ watch(draftInput, () => {
           </article>
 
           <div v-else key="empty" class="rounded-3xl border border-white/20 bg-black/35 px-6 py-16 text-center text-white/70">
-            No sayings found with current tag filters.
+            {{ viewMode === 'bookmarks'
+              ? 'No bookmarked sayings found. Save posts using the bookmark button.'
+              : 'No sayings found with current filters.' }}
           </div>
         </div>
       </div>
@@ -1003,16 +1092,25 @@ watch(draftInput, () => {
         <Shuffle class="h-5 w-5" />
       </button>
       <button
-        class="rounded-full border border-white/20 bg-black/35 p-3 text-white/90 transition hover:bg-black/60"
-        @click="copyCurrent"
+        class="rounded-full border p-3 transition"
+        :class="isCurrentBookmarked
+          ? 'border-amber-200/70 bg-amber-200/20 text-amber-100 hover:bg-amber-200/30'
+          : 'border-white/20 bg-black/35 text-white/90 hover:bg-black/60'"
+        @click="toggleBookmarkCurrent"
       >
-        <Copy class="h-5 w-5" />
+        <Bookmark class="h-5 w-5" />
       </button>
       <button
         class="rounded-full border border-white/20 bg-black/35 p-3 text-white/90 transition hover:bg-black/60"
         @click="showShareMenu = !showShareMenu"
       >
         <Share2 class="h-5 w-5" />
+      </button>
+      <button
+        class="rounded-full border border-white/20 bg-black/35 p-3 text-white/90 transition hover:bg-black/60"
+        @click="reportCurrent"
+      >
+        <AlertTriangle class="h-5 w-5" />
       </button>
     </div>
 
@@ -1035,6 +1133,14 @@ watch(draftInput, () => {
       >
         <Share2 class="h-4 w-4" />
         Share Text
+      </button>
+      <button
+        type="button"
+        class="flex items-center gap-2 rounded-lg px-3 py-2 text-left text-xs text-white/90 transition hover:bg-white/10"
+        @click.stop="copyCurrent(); showShareMenu = false"
+      >
+        <Copy class="h-4 w-4" />
+        Copy
       </button>
       <button
         type="button"
