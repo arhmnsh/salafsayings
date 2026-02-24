@@ -965,6 +965,14 @@ watch(bookmarkedIds, (next) => {
         <header class="pointer-events-auto flex items-center justify-between bg-[linear-gradient(180deg,rgba(9,9,11,0.95),rgba(9,9,11,0.65),transparent)] px-5 py-4 backdrop-blur-sm sm:px-8">
           <div>
             <p class="font-mono text-xs uppercase tracking-[0.2em] text-white/70">Salaf Sayings</p>
+            <a
+              href="https://arhmn.sh"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="mt-1 inline-block text-[11px] text-white/55 transition hover:text-white/85"
+            >
+              by AbdurRahaman Shah arhmn.sh
+            </a>
           </div>
           <div class="flex items-center gap-2">
             <button
