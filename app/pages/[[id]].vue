@@ -201,48 +201,43 @@ const linkCopied = ref(false)
 const shared = ref(false)
 const imageShared = ref(false)
 const shareError = ref('')
+const contentScroller = ref<HTMLElement | null>(null)
 const touchStartY = ref<number | null>(null)
+const touchLastY = ref<number | null>(null)
+const touchEdgeAccum = ref(0)
+const touchEdgeDirection = ref<1 | -1 | null>(null)
+const touchNavTriggered = ref(false)
+const wheelEdgeAccum = ref(0)
+const wheelEdgeDirection = ref<1 | -1 | null>(null)
+const wheelCooldownUntil = ref(0)
+const wheelResetTimer = ref<ReturnType<typeof setTimeout> | null>(null)
+const cardOffset = ref(0)
+const cardAnimating = ref(false)
+const cardTeleporting = ref(false)
 const showFirstVisitHint = ref(false)
 const showSearchPopup = ref(false)
 const showShareMenu = ref(false)
-const dragOffset = ref(0)
-const isDragging = ref(false)
-const isSettling = ref(false)
-const isTeleporting = ref(false)
-const pageScrollActive = ref(false)
-const wheelReleaseTimer = ref<ReturnType<typeof setTimeout> | null>(null)
-const GESTURE_THRESHOLD = 90
-const GESTURE_MAX_OFFSET = 180
-const SWIPE_SETTLE_MS = 170
-const SWIPE_SWAP_MS = 120
-const SWIPE_EXIT_OFFSET = 320
+const TOUCH_SWITCH_THRESHOLD = 70
+const WHEEL_SWITCH_THRESHOLD = 180
+const WHEEL_COOLDOWN_MS = 320
+const WHEEL_RESET_MS = 150
+const CARD_EXIT_OFFSET = 200
+const CARD_SWAP_MS = 110
+const CARD_SETTLE_MS = 170
 
 const current = computed(() => filteredSayings.value[activeIndex.value] || null)
 const progressLabel = computed(() =>
   filteredSayings.value.length === 0 ? '0 / 0' : `${activeIndex.value + 1} / ${filteredSayings.value.length}`
 )
-const cardStyle = computed(() => {
-  const scale = 1 - Math.min(Math.abs(dragOffset.value) / 2400, 0.03)
-  return {
-    transform: `translate3d(0, ${dragOffset.value}px, 0) scale(${scale})`
-  }
-})
-const cardMotionClass = computed(() =>
-  isDragging.value || isTeleporting.value ? '' : 'transition-transform duration-260 ease-out'
-)
 const isCurrentBookmarked = computed(() =>
   current.value ? bookmarkedSet.value.has(getRouteIdForItem(current.value)) : false
 )
-
-const canScrollPageInDirection = (deltaY: number) => {
-  if (!import.meta.client) return false
-  const scrollY = window.scrollY
-  const doc = document.documentElement
-  const maxScroll = Math.max(0, doc.scrollHeight - window.innerHeight)
-  if (deltaY > 0) return scrollY < maxScroll - 1
-  if (deltaY < 0) return scrollY > 1
-  return false
-}
+const cardStyle = computed(() => ({
+  transform: `translate3d(0, ${cardOffset.value}px, 0)`
+}))
+const cardMotionClass = computed(() =>
+  cardTeleporting.value ? '' : 'transition-transform duration-200 ease-out'
+)
 const getRouteIdForItem = (item: any) => String(item?.id || item?.slug || '')
 const getRouteParamId = () => {
   const raw = route.params.id
@@ -258,132 +253,182 @@ const syncUrlToCurrent = async () => {
   await router.replace({ path: `/${encodeURIComponent(nextId)}` })
 }
 
-const move = (dir: 1 | -1) => {
-  showShareMenu.value = false
-  if (!filteredSayings.value.length) return
-  const nextIndex = activeIndex.value + dir
-  if (nextIndex < 0 || nextIndex >= filteredSayings.value.length) return
-  activeIndex.value = nextIndex
-  if (import.meta.client) {
-    window.scrollTo({ top: 0, behavior: 'auto' })
-  }
-}
-
 const nextFrame = () => new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
 const wait = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms))
 
-const finishGesture = () => {
+const move = (dir: 1 | -1) => {
   showShareMenu.value = false
-  if (!filteredSayings.value.length) {
-    dragOffset.value = 0
-    isDragging.value = false
-    return
-  }
-
-  const distance = dragOffset.value
-  const absDistance = Math.abs(distance)
-
-  if (absDistance < GESTURE_THRESHOLD) {
-    dragOffset.value = 0
-    isDragging.value = false
-    return
-  }
-
-  const dir: 1 | -1 = distance < 0 ? 1 : -1
+  if (cardAnimating.value) return
+  if (!filteredSayings.value.length) return
   const nextIndex = activeIndex.value + dir
-
-  if (nextIndex < 0 || nextIndex >= filteredSayings.value.length) {
-    dragOffset.value = 0
-    isDragging.value = false
-    return
-  }
-
-  isDragging.value = false
-  isSettling.value = true
+  if (nextIndex < 0 || nextIndex >= filteredSayings.value.length) return
+  cardAnimating.value = true
 
   ;(async () => {
-    // Phase 1: push current card fully out in swipe direction.
-    dragOffset.value = dir === 1 ? -SWIPE_EXIT_OFFSET : SWIPE_EXIT_OFFSET
-    await wait(SWIPE_SWAP_MS)
+    cardOffset.value = dir === 1 ? -CARD_EXIT_OFFSET : CARD_EXIT_OFFSET
+    await wait(CARD_SWAP_MS)
 
-    // Phase 2: swap content while card is off-screen, place next card opposite side.
-    move(dir)
-    isTeleporting.value = true
-    dragOffset.value = dir === 1 ? SWIPE_EXIT_OFFSET : -SWIPE_EXIT_OFFSET
+    activeIndex.value = nextIndex
+    if (contentScroller.value) {
+      contentScroller.value.scrollTop = 0
+    }
 
-    // Ensure browser paints the off-screen state before animating to center.
+    cardTeleporting.value = true
+    cardOffset.value = dir === 1 ? CARD_EXIT_OFFSET : -CARD_EXIT_OFFSET
     await nextFrame()
-    isTeleporting.value = false
+    cardTeleporting.value = false
     await nextFrame()
 
-    // Phase 3: slide incoming card into center.
-    dragOffset.value = 0
-    await wait(SWIPE_SETTLE_MS)
-    isSettling.value = false
+    cardOffset.value = 0
+    await wait(CARD_SETTLE_MS)
+    cardAnimating.value = false
   })()
 }
 
-const onWheel = (event: WheelEvent) => {
+const getScrollEdges = (el: HTMLElement) => {
+  const top = el.scrollTop <= 1
+  const bottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 1
+  return { top, bottom }
+}
+
+const onContentWheel = (event: WheelEvent) => {
   showShareMenu.value = false
-  if (isSettling.value) return
   if (Math.abs(event.deltaY) < 2) return
-  if (canScrollPageInDirection(event.deltaY)) {
+  if (cardAnimating.value) {
+    event.preventDefault()
+    return
+  }
+  const scroller = contentScroller.value
+  if (!scroller) return
+  const { top, bottom } = getScrollEdges(scroller)
+  const direction: 1 | -1 = event.deltaY > 0 ? 1 : -1
+  const canScrollInDirection = direction === 1 ? !bottom : !top
+
+  if (canScrollInDirection) {
+    wheelEdgeAccum.value = 0
+    wheelEdgeDirection.value = null
+    if (wheelResetTimer.value) {
+      clearTimeout(wheelResetTimer.value)
+      wheelResetTimer.value = null
+    }
     return
   }
 
-  isDragging.value = true
-  dragOffset.value -= event.deltaY * 0.55
-  dragOffset.value = Math.max(-GESTURE_MAX_OFFSET, Math.min(GESTURE_MAX_OFFSET, dragOffset.value))
+  event.preventDefault()
+  const now = Date.now()
+  if (now < wheelCooldownUntil.value) return
 
-  if (wheelReleaseTimer.value) {
-    clearTimeout(wheelReleaseTimer.value)
+  if (wheelEdgeDirection.value !== direction) {
+    wheelEdgeDirection.value = direction
+    wheelEdgeAccum.value = 0
   }
-  wheelReleaseTimer.value = setTimeout(() => {
-    finishGesture()
-  }, 90)
+
+  wheelEdgeAccum.value += Math.min(80, Math.abs(event.deltaY))
+  if (wheelEdgeAccum.value >= WHEEL_SWITCH_THRESHOLD) {
+    wheelEdgeAccum.value = 0
+    wheelEdgeDirection.value = null
+    wheelCooldownUntil.value = now + WHEEL_COOLDOWN_MS
+    move(direction)
+    return
+  }
+
+  if (wheelResetTimer.value) {
+    clearTimeout(wheelResetTimer.value)
+  }
+  wheelResetTimer.value = setTimeout(() => {
+    wheelEdgeAccum.value = 0
+    wheelEdgeDirection.value = null
+  }, WHEEL_RESET_MS)
 }
 
-const onTouchStart = (event: TouchEvent) => {
+const onContentTouchStart = (event: TouchEvent) => {
   const target = event.target as HTMLElement | null
   if (target?.closest('[data-share-menu]') || target?.closest('[data-search-popup]')) {
     return
   }
   showShareMenu.value = false
-  if (isSettling.value) return
   touchStartY.value = event.touches[0]?.clientY ?? null
-  pageScrollActive.value = false
-  isDragging.value = true
+  touchLastY.value = touchStartY.value
+  touchEdgeAccum.value = 0
+  touchEdgeDirection.value = null
+  touchNavTriggered.value = false
 }
 
-const onTouchMove = (event: TouchEvent) => {
-  if (touchStartY.value === null || isSettling.value) return
+const onContentTouchMove = (event: TouchEvent) => {
+  if (touchStartY.value === null) return
+  if (touchNavTriggered.value) {
+    if (event.cancelable) event.preventDefault()
+    return
+  }
+  const scroller = contentScroller.value
+  if (!scroller) return
   const currentY = event.touches[0]?.clientY ?? touchStartY.value
-  const delta = currentY - touchStartY.value
-  const intendedScrollDelta = -delta
-  if (canScrollPageInDirection(intendedScrollDelta)) {
-    pageScrollActive.value = true
-    isDragging.value = false
-    dragOffset.value = 0
+  const lastY = touchLastY.value ?? currentY
+  const stepDelta = currentY - lastY
+  touchLastY.value = currentY
+  if (Math.abs(stepDelta) < 1) return
+  const { top, bottom } = getScrollEdges(scroller)
+  const direction: 1 | -1 = stepDelta < 0 ? 1 : -1
+  const canScrollInDirection = direction === 1 ? !bottom : !top
+
+  if (canScrollInDirection) {
+    touchEdgeAccum.value = 0
+    touchEdgeDirection.value = null
     return
   }
-  dragOffset.value = Math.max(-GESTURE_MAX_OFFSET, Math.min(GESTURE_MAX_OFFSET, delta))
+
+  if (event.cancelable) event.preventDefault()
+
+  if (touchEdgeDirection.value !== direction) {
+    touchEdgeDirection.value = direction
+    touchEdgeAccum.value = 0
+  }
+
+  touchEdgeAccum.value += Math.abs(stepDelta)
+  if (touchEdgeAccum.value >= TOUCH_SWITCH_THRESHOLD) {
+    touchNavTriggered.value = true
+    touchEdgeAccum.value = 0
+    touchEdgeDirection.value = null
+    move(direction)
+  }
 }
 
-const onTouchEnd = (event: TouchEvent) => {
-  if (touchStartY.value === null || isSettling.value) return
-  if (pageScrollActive.value) {
-    touchStartY.value = null
-    pageScrollActive.value = false
-    dragOffset.value = 0
-    isDragging.value = false
+const onContentTouchEnd = () => {
+  touchStartY.value = null
+  touchLastY.value = null
+  touchEdgeAccum.value = 0
+  touchEdgeDirection.value = null
+  touchNavTriggered.value = false
+}
+
+const lockViewportScroll = () => {
+  if (!import.meta.client) return
+  const html = document.documentElement
+  const body = document.body
+  html.style.overflow = 'hidden'
+  body.style.overflow = 'hidden'
+  html.style.overscrollBehaviorY = 'none'
+  body.style.overscrollBehaviorY = 'none'
+}
+
+const unlockViewportScroll = () => {
+  if (!import.meta.client) return
+  const html = document.documentElement
+  const body = document.body
+  html.style.removeProperty('overflow')
+  body.style.removeProperty('overflow')
+  html.style.removeProperty('overscroll-behavior-y')
+  body.style.removeProperty('overscroll-behavior-y')
+}
+
+const onRootTouchMove = (event: TouchEvent) => {
+  const target = event.target as HTMLElement | null
+  if (target?.closest('[data-content-scroller]') || target?.closest('[data-search-popup]') || target?.closest('[data-share-menu]')) {
     return
   }
-  const endY = event.changedTouches[0]?.clientY ?? touchStartY.value
-  const delta = endY - touchStartY.value
-  dragOffset.value = Math.max(-GESTURE_MAX_OFFSET, Math.min(GESTURE_MAX_OFFSET, delta))
-  finishGesture()
-  touchStartY.value = null
-  pageScrollActive.value = false
+  if (event.cancelable) {
+    event.preventDefault()
+  }
 }
 
 const shuffle = () => {
@@ -888,7 +933,17 @@ watch(activeIndex, () => {
   syncUrlToCurrent()
 })
 
+watch(
+  () => current.value ? getRouteIdForItem(current.value) : '',
+  () => {
+    if (contentScroller.value) {
+      contentScroller.value.scrollTop = 0
+    }
+  }
+)
+
 onMounted(() => {
+  lockViewportScroll()
   const storedBookmarks = localStorage.getItem('salafsayings-bookmarks')
   if (storedBookmarks) {
     try {
@@ -917,9 +972,11 @@ onMounted(() => {
   window.addEventListener('keydown', handler)
   onUnmounted(() => {
     window.removeEventListener('keydown', handler)
-    if (wheelReleaseTimer.value) {
-      clearTimeout(wheelReleaseTimer.value)
+    if (wheelResetTimer.value) {
+      clearTimeout(wheelResetTimer.value)
+      wheelResetTimer.value = null
     }
+    unlockViewportScroll()
   })
 })
 
@@ -952,11 +1009,8 @@ watch(bookmarkedIds, (next) => {
 
 <template>
   <div
-    class="relative min-h-screen overflow-x-hidden bg-[radial-gradient(circle_at_20%_20%,rgba(245,158,11,0.14),transparent_40%),radial-gradient(circle_at_80%_80%,rgba(14,165,233,0.12),transparent_38%),linear-gradient(145deg,#09090b,#111827_45%,#1f2937)] text-white"
-    @wheel.passive="onWheel"
-    @touchstart.passive="onTouchStart"
-    @touchmove.passive="onTouchMove"
-    @touchend.passive="onTouchEnd"
+    class="relative h-dvh overflow-hidden bg-[radial-gradient(circle_at_20%_20%,rgba(245,158,11,0.14),transparent_40%),radial-gradient(circle_at_80%_80%,rgba(14,165,233,0.12),transparent_38%),linear-gradient(145deg,#09090b,#111827_45%,#1f2937)] text-white"
+    @touchmove="onRootTouchMove"
   >
     <div class="pointer-events-none absolute inset-0 bg-[linear-gradient(0deg,rgba(17,24,39,0.9),rgba(17,24,39,0.18)_45%,rgba(17,24,39,0.9))]" />
 
@@ -1029,15 +1083,24 @@ watch(bookmarkedIds, (next) => {
     </Teleport>
 
     <main
-      class="relative z-10 flex min-h-[calc(100vh-5rem)] items-start justify-center px-5 pb-24 sm:px-8"
+      class="relative z-10 flex h-dvh items-start justify-center overflow-hidden px-5 pb-24 sm:px-8"
       :class="activeFilterItems.length ? 'pt-32' : 'pt-24'"
     >
-      <div class="w-full max-w-4xl">
+      <div
+        ref="contentScroller"
+        data-content-scroller
+        class="h-full w-full max-w-4xl overflow-y-auto overscroll-contain [touch-action:pan-y]"
+        @wheel="onContentWheel"
+        @touchstart.passive="onContentTouchStart"
+        @touchmove="onContentTouchMove"
+        @touchend.passive="onContentTouchEnd"
+        @touchcancel.passive="onContentTouchEnd"
+      >
         <div :class="cardMotionClass" :style="cardStyle">
           <article
             v-if="current"
             :key="current.id"
-            class="w-full rounded-3xl border border-white/20 bg-black/35 p-7 shadow-2xl backdrop-blur-xl sm:p-10"
+            class="w-full min-h-[calc(100dvh-12rem)] rounded-3xl border border-white/20 bg-black/35 p-7 shadow-2xl backdrop-blur-xl sm:min-h-[calc(100dvh-13.5rem)] sm:p-10"
           >
             <p v-if="current.intro" class="mb-5 font-sans text-sm leading-relaxed text-white/70 sm:text-base">
               {{ current.intro }}
@@ -1268,3 +1331,15 @@ watch(bookmarkedIds, (next) => {
     </div>
   </div>
 </template>
+
+<style scoped>
+:global(html),
+:global(body) {
+  background: #09090b;
+  overscroll-behavior-y: none;
+}
+
+[data-content-scroller] {
+  -webkit-overflow-scrolling: touch;
+}
+</style>
