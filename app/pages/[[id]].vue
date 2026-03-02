@@ -1111,11 +1111,19 @@ watch(bookmarkedIds, (next) => {
           <p class="mt-5 max-w-2xl text-sm leading-relaxed text-white/78 sm:text-base">
             A focused space to read concise reminders from the Salaf with an interface designed for calm, quick reflection.
           </p>
-          <p class="mt-8 text-xs uppercase tracking-[0.18em] text-white/55">Built By</p>
+          <p class="mt-8 text-xs uppercase tracking-[0.18em] text-white/55">By</p>
           <p class="mt-2 text-lg text-white">AbdurRahaman Shah</p>
 
-          <p class="mt-8 text-xs uppercase tracking-[0.18em] text-white/55">Contact</p>
-          <div class="mt-2 flex flex-wrap items-center gap-5 text-sm text-white/90">
+          <div class="mt-8 flex flex-col items-start gap-3 text-sm text-white/90">
+            <a
+              href="https://arhmn.sh"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-2 text-amber-200 transition hover:text-amber-100"
+            >
+              <Globe class="h-4 w-4 text-amber-200/85" />
+              arhmn.sh
+            </a>
             <a
               href="https://x.com/arhmnsh"
               target="_blank"
@@ -1131,15 +1139,6 @@ watch(bookmarkedIds, (next) => {
             >
               <Mail class="h-4 w-4 text-white/65" />
               hi@arhmn.sh
-            </a>
-            <a
-              href="https://arhmn.sh"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="inline-flex items-center gap-2 text-amber-200 transition hover:text-amber-100"
-            >
-              <Globe class="h-4 w-4 text-amber-200/85" />
-              arhmn.sh
             </a>
           </div>
         </section>
