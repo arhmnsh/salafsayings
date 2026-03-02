@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { AlertTriangle, Bookmark, BookMarked, ChevronDown, ChevronUp, Copy, Hash, Home, Image, Info, Link2, Search, Share2, Shuffle } from 'lucide-vue-next'
+import { AlertTriangle, AtSign, Bookmark, BookMarked, ChevronDown, ChevronUp, Copy, Globe, Hash, Home, Image, Info, Link2, Mail, Search, Share2, Shuffle } from 'lucide-vue-next'
 import QRCode from 'qrcode'
 
 definePageMeta({ layout: false, key: 'salafsayings-feed' })
@@ -1112,17 +1112,7 @@ watch(bookmarkedIds, (next) => {
             A focused space to read concise reminders from the Salaf with an interface designed for calm, quick reflection.
           </p>
           <p class="mt-8 text-xs uppercase tracking-[0.18em] text-white/55">Built By</p>
-          <p class="mt-2 text-lg text-white">
-            AbdurRahaman Shah
-            <a
-              href="https://arhmn.sh"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="ml-2 text-amber-200 transition hover:text-amber-100"
-            >
-              arhmn.sh
-            </a>
-          </p>
+          <p class="mt-2 text-lg text-white">AbdurRahaman Shah</p>
 
           <p class="mt-8 text-xs uppercase tracking-[0.18em] text-white/55">Contact</p>
           <div class="mt-2 flex flex-wrap items-center gap-5 text-sm text-white/90">
@@ -1130,15 +1120,26 @@ watch(bookmarkedIds, (next) => {
               href="https://x.com/arhmnsh"
               target="_blank"
               rel="noopener noreferrer"
-              class="transition hover:text-white"
+              class="inline-flex items-center gap-2 transition hover:text-white"
             >
+              <AtSign class="h-4 w-4 text-white/65" />
               X / @arhmnsh
             </a>
             <a
               href="mailto:hi@arhmn.sh"
-              class="transition hover:text-white"
+              class="inline-flex items-center gap-2 transition hover:text-white"
             >
+              <Mail class="h-4 w-4 text-white/65" />
               hi@arhmn.sh
+            </a>
+            <a
+              href="https://arhmn.sh"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-2 text-amber-200 transition hover:text-amber-100"
+            >
+              <Globe class="h-4 w-4 text-amber-200/85" />
+              arhmn.sh
             </a>
           </div>
         </section>
