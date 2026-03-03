@@ -5,6 +5,9 @@ export default defineNuxtPlugin(() => {
   const posthogClient = posthog
 
   if (config.public.posthogPublicKey) {
+    const site = config.public.analyticsSite || 'salafsayings'
+    const siteDomain = config.public.analyticsDomain || 'salafsayings.arhmn.sh'
+
     posthogClient.init(config.public.posthogPublicKey, {
       api_host: config.public.posthogHost || 'https://us.i.posthog.com',
       capture_pageview: false,
@@ -13,13 +16,25 @@ export default defineNuxtPlugin(() => {
       }
     })
 
-    const router = useRouter()
-    router.afterEach((to) => {
+    posthogClient.register({
+      site,
+      site_domain: siteDomain
+    })
+
+    const capturePageview = (path: string) => {
       nextTick(() => {
-        posthog.capture('$pageview', {
-          $current_url: to.fullPath
+        posthogClient.capture('$pageview', {
+          $current_url: path,
+          site,
+          site_domain: siteDomain
         })
       })
+    }
+
+    const router = useRouter()
+    capturePageview(router.currentRoute.value.fullPath)
+    router.afterEach((to) => {
+      capturePageview(to.fullPath)
     })
   }
 

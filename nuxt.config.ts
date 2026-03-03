@@ -24,7 +24,9 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       posthogPublicKey: '',
-      posthogHost: ''
+      posthogHost: '',
+      analyticsSite: 'salafsayings',
+      analyticsDomain: 'salafsayings.arhmn.sh'
     }
   }
 })
