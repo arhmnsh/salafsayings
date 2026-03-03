@@ -20,5 +20,13 @@ export default defineNuxtConfig({
     plugins: {
       '@tailwindcss/postcss': {}
     }
+  },
+  runtimeConfig: {
+    public: {
+      posthogPublicKey: '',
+      posthogHost: '',
+      analyticsSite: 'salafsayings',
+      analyticsDomain: 'salafsayings.arhmn.sh'
+    }
   }
 })

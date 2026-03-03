@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { AlertTriangle, Bookmark, BookmarkCheck, ChevronDown, ChevronUp, Copy, Hash, Image, Link2, Search, Share2, Shuffle } from 'lucide-vue-next'
+import { AlertTriangle, AtSign, Bookmark, BookMarked, ChevronDown, ChevronUp, Copy, Globe, Hash, Home, Image, Info, Link2, Mail, Search, Share2, Shuffle } from 'lucide-vue-next'
 import QRCode from 'qrcode'
 
 definePageMeta({ layout: false, key: 'salafsayings-feed' })
@@ -20,7 +20,7 @@ type QueryToken = {
   value: string
   normalized?: string
 }
-type ViewMode = 'all' | 'bookmarks'
+type ViewMode = 'home' | 'bookmarks' | 'about'
 
 const normalizeTagText = (value: string) =>
   value
@@ -191,8 +191,10 @@ const filteredSayings = computed(() => {
     return textMatches && tagMatches
   })
 
-  if (viewMode.value === 'all') return searchableSayings
-  return searchableSayings.filter(item => bookmarkedSet.value.has(getRouteIdForItem(item)))
+  if (viewMode.value === 'bookmarks') {
+    return searchableSayings.filter(item => bookmarkedSet.value.has(getRouteIdForItem(item)))
+  }
+  return searchableSayings
 })
 
 const activeIndex = ref(0)
@@ -226,6 +228,7 @@ const CARD_SWAP_MS = 110
 const CARD_SETTLE_MS = 170
 
 const current = computed(() => filteredSayings.value[activeIndex.value] || null)
+const isAboutView = computed(() => viewMode.value === 'about')
 const progressLabel = computed(() =>
   filteredSayings.value.length === 0 ? '0 / 0' : `${activeIndex.value + 1} / ${filteredSayings.value.length}`
 )
@@ -257,6 +260,7 @@ const nextFrame = () => new Promise<void>(resolve => requestAnimationFrame(() =>
 const wait = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms))
 
 const move = (dir: 1 | -1) => {
+  if (isAboutView.value) return
   showShareMenu.value = false
   if (cardAnimating.value) return
   if (!filteredSayings.value.length) return
@@ -432,6 +436,7 @@ const onRootTouchMove = (event: TouchEvent) => {
 }
 
 const shuffle = () => {
+  if (isAboutView.value) return
   showShareMenu.value = false
   if (filteredSayings.value.length < 2) return
   let nextIndex = activeIndex.value
@@ -442,6 +447,7 @@ const shuffle = () => {
 }
 
 const toggleBookmarkCurrent = () => {
+  if (isAboutView.value) return
   if (!current.value) return
   const id = getRouteIdForItem(current.value)
   if (!id) return
@@ -453,6 +459,7 @@ const toggleBookmarkCurrent = () => {
 }
 
 const copyCurrent = async () => {
+  if (isAboutView.value) return
   if (!current.value || !import.meta.client) return
   const shareUrl = getPublicQuoteUrl(current.value)
   const payload = `"${current.value.quote}"${current.value.author ? ` — ${current.value.author}` : ''}\n${shareUrl}`
@@ -474,6 +481,7 @@ const getShareText = (item: any) => {
 }
 
 const shareCurrent = async () => {
+  if (isAboutView.value) return
   if (!current.value || !import.meta.client) return
   shareError.value = ''
   const text = getShareText(current.value)
@@ -745,6 +753,7 @@ const renderShareImageBlob = async () => {
 }
 
 const shareImageCurrent = async () => {
+  if (isAboutView.value) return
   if (!current.value || !import.meta.client) return
   shareError.value = ''
   const blob = await renderShareImageBlob()
@@ -784,6 +793,7 @@ const shareImageCurrent = async () => {
 }
 
 const copyCurrentLink = async () => {
+  if (isAboutView.value) return
   if (!current.value || !import.meta.client) return
   showShareMenu.value = false
   shareError.value = ''
@@ -802,6 +812,7 @@ const copyCurrentLink = async () => {
 }
 
 const reportCurrent = () => {
+  if (isAboutView.value) return
   if (!current.value || !import.meta.client) return
   showShareMenu.value = false
   const quoteUrl = getPublicQuoteUrl(current.value)
@@ -933,6 +944,18 @@ watch(activeIndex, () => {
   syncUrlToCurrent()
 })
 
+watch(viewMode, (next) => {
+  showShareMenu.value = false
+  if (next === 'about') {
+    showSearchPopup.value = false
+  }
+  nextTick(() => {
+    if (contentScroller.value) {
+      contentScroller.value.scrollTop = 0
+    }
+  })
+})
+
 watch(
   () => current.value ? getRouteIdForItem(current.value) : '',
   () => {
@@ -1030,15 +1053,6 @@ watch(bookmarkedIds, (next) => {
           </div>
           <div class="flex items-center gap-2">
             <button
-              class="rounded-full border p-2 transition"
-              :class="viewMode === 'bookmarks'
-                ? 'border-amber-200/70 bg-amber-200/20 text-amber-100 hover:bg-amber-200/30'
-                : 'border-white/20 bg-black/30 text-white/90 hover:bg-black/55'"
-              @click="viewMode = viewMode === 'all' ? 'bookmarks' : 'all'"
-            >
-              <BookmarkCheck class="h-4 w-4" />
-            </button>
-            <button
               class="rounded-full border border-white/20 bg-black/30 p-2 text-white/90 transition hover:bg-black/55"
               @click="showSearchPopup = true"
             >
@@ -1071,19 +1085,11 @@ watch(bookmarkedIds, (next) => {
             </button>
           </div>
         </div>
-        <div
-          v-if="viewMode === 'bookmarks'"
-          class="pointer-events-none px-5 pb-2 sm:px-8"
-        >
-          <span class="inline-flex rounded-full border border-amber-200/60 bg-amber-200/20 px-3 py-1 text-xs text-amber-100">
-            Showing bookmarked posts ({{ bookmarkedIds.length }})
-          </span>
-        </div>
       </div>
     </Teleport>
 
     <main
-      class="relative z-10 flex h-dvh items-start justify-center overflow-hidden px-5 pb-24 sm:px-8"
+      class="relative z-10 flex h-dvh items-start justify-center overflow-hidden px-5 pb-32 sm:px-8"
       :class="activeFilterItems.length ? 'pt-32' : 'pt-24'"
     >
       <div
@@ -1096,9 +1102,50 @@ watch(bookmarkedIds, (next) => {
         @touchend.passive="onContentTouchEnd"
         @touchcancel.passive="onContentTouchEnd"
       >
+        <section
+          v-if="isAboutView"
+          class="w-full min-h-[calc(100dvh-12rem)] bg-[linear-gradient(180deg,rgba(2,6,23,0.72),rgba(2,6,23,0.52))] px-6 py-8 sm:min-h-[calc(100dvh-13.5rem)] sm:px-10 sm:py-10"
+        >
+          <p class="font-mono text-[11px] uppercase tracking-[0.22em] text-white/50">About</p>
+          <h2 class="mt-2 font-serif text-3xl text-white sm:text-4xl">Salaf Sayings</h2>
+          <p class="mt-5 max-w-2xl text-sm leading-relaxed text-white/78 sm:text-base">
+            A focused space to read concise reminders from the Salaf with an interface designed for calm, quick reflection.
+          </p>
+          <p class="mt-8 text-xs uppercase tracking-[0.18em] text-white/55">By</p>
+          <p class="mt-2 text-lg text-white">AbdurRahaman Shah</p>
+
+          <div class="mt-8 flex flex-col items-start gap-3 text-sm text-white/90">
+            <a
+              href="https://arhmn.sh"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-2 text-amber-200 transition hover:text-amber-100"
+            >
+              <Globe class="h-4 w-4 text-amber-200/85" />
+              arhmn.sh
+            </a>
+            <a
+              href="https://x.com/arhmnsh"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-2 transition hover:text-white"
+            >
+              <AtSign class="h-4 w-4 text-white/65" />
+              X / @arhmnsh
+            </a>
+            <a
+              href="mailto:hi@arhmn.sh"
+              class="inline-flex items-center gap-2 transition hover:text-white"
+            >
+              <Mail class="h-4 w-4 text-white/65" />
+              hi@arhmn.sh
+            </a>
+          </div>
+        </section>
+
         <div :class="cardMotionClass" :style="cardStyle">
           <article
-            v-if="current"
+            v-if="current && !isAboutView"
             :key="current.id"
             class="w-full min-h-[calc(100dvh-12rem)] rounded-3xl border border-white/20 bg-black/35 p-7 shadow-2xl backdrop-blur-xl sm:min-h-[calc(100dvh-13.5rem)] sm:p-10"
           >
@@ -1132,16 +1179,16 @@ watch(bookmarkedIds, (next) => {
             </div>
           </article>
 
-          <div v-else key="empty" class="rounded-3xl border border-white/20 bg-black/35 px-6 py-16 text-center text-white/70">
+          <div v-else-if="!isAboutView" key="empty" class="w-full border border-white/15 bg-black/30 px-6 py-16 text-center text-white/72">
             {{ viewMode === 'bookmarks'
-              ? 'No bookmarked sayings found. Save posts using the bookmark button.'
+              ? 'No bookmarked sayings yet. Save a post from Home to find it here.'
               : 'No sayings found with current filters.' }}
           </div>
         </div>
       </div>
     </main>
 
-    <div class="fixed right-4 top-1/2 z-30 flex -translate-y-1/2 flex-col gap-3 sm:right-6">
+    <div v-if="!isAboutView" class="fixed right-4 top-1/2 z-30 flex -translate-y-1/2 flex-col gap-3 sm:right-6">
       <button
         class="rounded-full border border-white/20 bg-black/35 p-3 text-white/90 transition hover:bg-black/60 disabled:cursor-not-allowed disabled:opacity-40"
         :disabled="activeIndex === 0"
@@ -1186,13 +1233,13 @@ watch(bookmarkedIds, (next) => {
     </div>
 
     <div
-      v-if="showShareMenu"
+      v-if="showShareMenu && !isAboutView"
       class="fixed inset-0 z-20"
       @click="showShareMenu = false"
     />
 
     <div
-      v-if="showShareMenu"
+      v-if="showShareMenu && !isAboutView"
       class="fixed right-20 top-1/2 z-30 flex -translate-y-1/2 flex-col gap-2 rounded-xl border border-white/20 bg-black/70 p-2 backdrop-blur-md"
       data-share-menu
       @click.stop
@@ -1231,9 +1278,49 @@ watch(bookmarkedIds, (next) => {
       </button>
     </div>
 
-    <div class="fixed bottom-4 left-1/2 z-30 -translate-x-1/2 rounded-full border border-white/20 bg-black/40 px-4 py-2 text-xs text-white/75">
+    <div class="fixed bottom-24 left-1/2 z-30 -translate-x-1/2 rounded-full border border-white/20 bg-black/40 px-4 py-2 text-xs text-white/75">
       {{ copied ? 'Copied' : linkCopied ? 'Link copied' : imageShared ? 'Image ready to share' : shared ? 'Shared' : shareError || (showFirstVisitHint ? 'Swipe up/down like TikTok' : 'Swipe, scroll, or use ↑ ↓') }}
     </div>
+
+    <nav class="fixed inset-x-0 bottom-4 z-40">
+      <div class="mx-auto w-fit rounded-[2rem] border border-white/20 bg-[linear-gradient(180deg,rgba(255,255,255,0.16),rgba(255,255,255,0.05))] p-1 shadow-[0_14px_38px_rgba(0,0,0,0.45)] backdrop-blur-2xl">
+        <div class="flex items-center gap-1 rounded-[1.7rem] bg-[linear-gradient(180deg,rgba(7,16,35,0.8),rgba(4,10,24,0.62))] px-1 py-1">
+        <button
+          type="button"
+          class="flex min-w-[84px] flex-col items-center gap-1 rounded-[1.2rem] px-3 py-2 text-[11px] transition"
+          :class="viewMode === 'home'
+            ? 'bg-white/[0.14] text-amber-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.38)]'
+            : 'text-white/75 hover:bg-white/[0.08] hover:text-white'"
+          @click="viewMode = 'home'"
+        >
+          <Home class="h-4 w-4" />
+          Home
+        </button>
+        <button
+          type="button"
+          class="flex min-w-[84px] flex-col items-center gap-1 rounded-[1.2rem] px-3 py-2 text-[11px] transition"
+          :class="viewMode === 'bookmarks'
+            ? 'bg-white/[0.14] text-amber-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.38)]'
+            : 'text-white/75 hover:bg-white/[0.08] hover:text-white'"
+          @click="viewMode = 'bookmarks'"
+        >
+          <BookMarked class="h-4 w-4" />
+          Bookmarks
+        </button>
+        <button
+          type="button"
+          class="flex min-w-[84px] flex-col items-center gap-1 rounded-[1.2rem] px-3 py-2 text-[11px] transition"
+          :class="viewMode === 'about'
+            ? 'bg-white/[0.14] text-amber-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.38)]'
+            : 'text-white/75 hover:bg-white/[0.08] hover:text-white'"
+          @click="viewMode = 'about'"
+        >
+          <Info class="h-4 w-4" />
+          About
+        </button>
+        </div>
+      </div>
+    </nav>
 
     <div
       v-if="showSearchPopup"
