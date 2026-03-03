@@ -1283,12 +1283,12 @@ watch(bookmarkedIds, (next) => {
     </div>
 
     <nav class="fixed inset-x-0 bottom-4 z-40">
-      <div class="mx-auto w-fit rounded-[1.4rem] border border-white/20 bg-[linear-gradient(180deg,rgba(255,255,255,0.16),rgba(255,255,255,0.05))] p-1 shadow-[0_12px_30px_rgba(0,0,0,0.42)] backdrop-blur-2xl">
-        <div class="flex items-center gap-1 rounded-[1.15rem] bg-[linear-gradient(180deg,rgba(7,16,35,0.8),rgba(4,10,24,0.62))] px-1 py-1">
+      <div class="mx-auto w-[min(88vw,22rem)] rounded-[1.4rem] border border-white/20 bg-[linear-gradient(180deg,rgba(255,255,255,0.16),rgba(255,255,255,0.05))] p-1 shadow-[0_12px_30px_rgba(0,0,0,0.42)] backdrop-blur-2xl">
+        <div class="flex items-center gap-1 rounded-[1.15rem] bg-[linear-gradient(180deg,rgba(7,16,35,0.8),rgba(4,10,24,0.62))] px-1.5 py-1">
         <button
           type="button"
           aria-label="Home"
-          class="flex h-10 w-10 items-center justify-center rounded-[0.95rem] transition"
+          class="flex h-10 flex-1 items-center justify-center rounded-[0.95rem] transition"
           :class="viewMode === 'home'
             ? 'bg-white/[0.14] text-amber-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.38)]'
             : 'text-white/75 hover:bg-white/[0.08] hover:text-white'"
@@ -1299,7 +1299,7 @@ watch(bookmarkedIds, (next) => {
         <button
           type="button"
           aria-label="Bookmarks"
-          class="flex h-10 w-10 items-center justify-center rounded-[0.95rem] transition"
+          class="flex h-10 flex-1 items-center justify-center rounded-[0.95rem] transition"
           :class="viewMode === 'bookmarks'
             ? 'bg-white/[0.14] text-amber-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.38)]'
             : 'text-white/75 hover:bg-white/[0.08] hover:text-white'"
@@ -1310,7 +1310,7 @@ watch(bookmarkedIds, (next) => {
         <button
           type="button"
           aria-label="About"
-          class="flex h-10 w-10 items-center justify-center rounded-[0.95rem] transition"
+          class="flex h-10 flex-1 items-center justify-center rounded-[0.95rem] transition"
           :class="viewMode === 'about'
             ? 'bg-white/[0.14] text-amber-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.38)]'
             : 'text-white/75 hover:bg-white/[0.08] hover:text-white'"
