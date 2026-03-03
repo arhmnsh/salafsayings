@@ -1278,45 +1278,45 @@ watch(bookmarkedIds, (next) => {
       </button>
     </div>
 
-    <div class="fixed bottom-24 left-1/2 z-30 -translate-x-1/2 rounded-full border border-white/20 bg-black/40 px-4 py-2 text-xs text-white/75">
+    <div class="fixed bottom-20 left-1/2 z-30 -translate-x-1/2 rounded-full border border-white/20 bg-black/40 px-4 py-2 text-xs text-white/75">
       {{ copied ? 'Copied' : linkCopied ? 'Link copied' : imageShared ? 'Image ready to share' : shared ? 'Shared' : shareError || (showFirstVisitHint ? 'Swipe up/down like TikTok' : 'Swipe, scroll, or use ↑ ↓') }}
     </div>
 
     <nav class="fixed inset-x-0 bottom-4 z-40">
-      <div class="mx-auto w-fit rounded-[2rem] border border-white/20 bg-[linear-gradient(180deg,rgba(255,255,255,0.16),rgba(255,255,255,0.05))] p-1 shadow-[0_14px_38px_rgba(0,0,0,0.45)] backdrop-blur-2xl">
-        <div class="flex items-center gap-1 rounded-[1.7rem] bg-[linear-gradient(180deg,rgba(7,16,35,0.8),rgba(4,10,24,0.62))] px-1 py-1">
+      <div class="mx-auto w-fit rounded-[1.4rem] border border-white/20 bg-[linear-gradient(180deg,rgba(255,255,255,0.16),rgba(255,255,255,0.05))] p-1 shadow-[0_12px_30px_rgba(0,0,0,0.42)] backdrop-blur-2xl">
+        <div class="flex items-center gap-1 rounded-[1.15rem] bg-[linear-gradient(180deg,rgba(7,16,35,0.8),rgba(4,10,24,0.62))] px-1 py-1">
         <button
           type="button"
-          class="flex min-w-[84px] flex-col items-center gap-1 rounded-[1.2rem] px-3 py-2 text-[11px] transition"
+          aria-label="Home"
+          class="flex h-10 w-10 items-center justify-center rounded-[0.95rem] transition"
           :class="viewMode === 'home'
             ? 'bg-white/[0.14] text-amber-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.38)]'
             : 'text-white/75 hover:bg-white/[0.08] hover:text-white'"
           @click="viewMode = 'home'"
         >
-          <Home class="h-4 w-4" />
-          Home
+          <Home class="h-[18px] w-[18px]" />
         </button>
         <button
           type="button"
-          class="flex min-w-[84px] flex-col items-center gap-1 rounded-[1.2rem] px-3 py-2 text-[11px] transition"
+          aria-label="Bookmarks"
+          class="flex h-10 w-10 items-center justify-center rounded-[0.95rem] transition"
           :class="viewMode === 'bookmarks'
             ? 'bg-white/[0.14] text-amber-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.38)]'
             : 'text-white/75 hover:bg-white/[0.08] hover:text-white'"
           @click="viewMode = 'bookmarks'"
         >
-          <BookMarked class="h-4 w-4" />
-          Bookmarks
+          <BookMarked class="h-[18px] w-[18px]" />
         </button>
         <button
           type="button"
-          class="flex min-w-[84px] flex-col items-center gap-1 rounded-[1.2rem] px-3 py-2 text-[11px] transition"
+          aria-label="About"
+          class="flex h-10 w-10 items-center justify-center rounded-[0.95rem] transition"
           :class="viewMode === 'about'
             ? 'bg-white/[0.14] text-amber-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.38)]'
             : 'text-white/75 hover:bg-white/[0.08] hover:text-white'"
           @click="viewMode = 'about'"
         >
-          <Info class="h-4 w-4" />
-          About
+          <Info class="h-[18px] w-[18px]" />
         </button>
         </div>
       </div>
