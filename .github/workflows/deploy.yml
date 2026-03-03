@@ -30,6 +30,11 @@ jobs:
 
       - name: Generate static files
         run: npm run generate
+        env:
+          NUXT_PUBLIC_POSTHOG_PUBLIC_KEY: ${{ secrets.NUXT_PUBLIC_POSTHOG_PUBLIC_KEY }}
+          NUXT_PUBLIC_POSTHOG_HOST: ${{ vars.NUXT_PUBLIC_POSTHOG_HOST }}
+          NUXT_PUBLIC_ANALYTICS_SITE: salafsayings
+          NUXT_PUBLIC_ANALYTICS_DOMAIN: salafsayings.arhmn.sh
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
