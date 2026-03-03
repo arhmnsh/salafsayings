@@ -42,7 +42,7 @@ const allTags = computed(() => {
 })
 
 const queryTokens = ref<QueryToken[]>([])
-const viewMode = ref<ViewMode>('all')
+const viewMode = ref<ViewMode>('home')
 const bookmarkedIds = ref<string[]>([])
 const draftInput = ref('')
 const searchInput = ref<HTMLInputElement | null>(null)
