@@ -5,6 +5,7 @@ import QRCode from 'qrcode'
 definePageMeta({ layout: false, key: 'salafsayings-feed' })
 const route = useRoute()
 const router = useRouter()
+const runtimeConfig = useRuntimeConfig()
 
 const { data: sayingsData } = await useAsyncData('salafsayings', () =>
   queryCollection('salafsayings').all()
@@ -247,6 +248,76 @@ const getRouteParamId = () => {
   if (Array.isArray(raw)) return raw[0] || ''
   return raw ? String(raw) : ''
 }
+
+const siteHost = computed(() => runtimeConfig.public.analyticsDomain || 'salafsayings.arhmn.sh')
+const siteUrl = computed(() => `https://${siteHost.value}`)
+const currentPublicUrl = computed(() => {
+  if (!current.value) return siteUrl.value
+  return `${siteUrl.value}/${encodeURIComponent(getRouteIdForItem(current.value))}`
+})
+
+const truncateForMeta = (value: string, maxLength = 220) => {
+  if (value.length <= maxLength) return value
+  return `${value.slice(0, maxLength - 1).trimEnd()}…`
+}
+
+const seoTitle = computed(() => {
+  if (current.value) {
+    const quoteLead = truncateForMeta(current.value.quote || '', 75)
+    return quoteLead ? `${quoteLead} | Salaf Sayings` : 'Salaf Sayings'
+  }
+  return 'Salaf Sayings'
+})
+
+const seoDescription = computed(() => {
+  if (current.value) {
+    const pieces = [
+      current.value.intro,
+      current.value.quote,
+      current.value.author ? `— ${current.value.author}` : ''
+    ].filter(Boolean)
+    return truncateForMeta(pieces.join(' '))
+  }
+  return 'A focused collection of concise reminders from the Salaf, designed for reflection.'
+})
+
+const seoImageUrl = computed(() => {
+  if (!current.value) return `${siteUrl.value}/api/og/app.svg`
+  return `${siteUrl.value}/api/og/${encodeURIComponent(getRouteIdForItem(current.value))}.svg`
+})
+const seoImageAlt = computed(() =>
+  current.value?.author
+    ? `Quote from ${current.value.author} on Salaf Sayings`
+    : 'Salaf Sayings share preview image'
+)
+
+useSeoMeta({
+  title: () => seoTitle.value,
+  description: () => seoDescription.value,
+  ogType: () => current.value ? 'article' : 'website',
+  ogSiteName: 'Salaf Sayings',
+  ogTitle: () => seoTitle.value,
+  ogDescription: () => seoDescription.value,
+  ogUrl: () => currentPublicUrl.value,
+  ogImage: () => seoImageUrl.value,
+  ogImageType: 'image/svg+xml',
+  ogImageWidth: '1200',
+  ogImageHeight: '630',
+  ogImageAlt: () => seoImageAlt.value,
+  twitterCard: 'summary_large_image',
+  twitterTitle: () => seoTitle.value,
+  twitterDescription: () => seoDescription.value,
+  twitterImage: () => seoImageUrl.value
+})
+
+useHead({
+  link: [
+    {
+      rel: 'canonical',
+      href: () => currentPublicUrl.value
+    }
+  ]
+})
 
 const syncUrlToCurrent = async () => {
   if (showSearchPopup.value) return
