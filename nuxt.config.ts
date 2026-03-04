@@ -1,3 +1,13 @@
+import fs from 'node:fs'
+import path from 'node:path'
+
+const sayingsPath = path.resolve(process.cwd(), 'content/salafsayings.json')
+const sayings = JSON.parse(fs.readFileSync(sayingsPath, 'utf8')) as Array<{ id?: string; slug?: string }>
+const sayingRoutes = sayings
+  .map((item) => String(item.id || item.slug || '').trim())
+  .filter(Boolean)
+  .map((id) => `/${encodeURIComponent(id)}`)
+
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   srcDir: 'app',
@@ -27,6 +37,11 @@ export default defineNuxtConfig({
       posthogHost: '',
       analyticsSite: 'salafsayings',
       analyticsDomain: 'salafsayings.arhmn.sh'
+    }
+  },
+  nitro: {
+    prerender: {
+      routes: ['/', ...sayingRoutes]
     }
   }
 })

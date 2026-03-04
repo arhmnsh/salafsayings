@@ -282,8 +282,8 @@ const seoDescription = computed(() => {
 })
 
 const seoImageUrl = computed(() => {
-  if (!current.value) return `${siteUrl.value}/api/og/app.svg`
-  return `${siteUrl.value}/api/og/${encodeURIComponent(getRouteIdForItem(current.value))}.svg`
+  if (!current.value) return `${siteUrl.value}/og/app.png`
+  return `${siteUrl.value}/og/${encodeURIComponent(getRouteIdForItem(current.value))}.png`
 })
 const seoImageAlt = computed(() =>
   current.value?.author
@@ -300,7 +300,7 @@ useSeoMeta({
   ogDescription: () => seoDescription.value,
   ogUrl: () => currentPublicUrl.value,
   ogImage: () => seoImageUrl.value,
-  ogImageType: 'image/svg+xml',
+  ogImageType: 'image/png',
   ogImageWidth: '1200',
   ogImageHeight: '630',
   ogImageAlt: () => seoImageAlt.value,
