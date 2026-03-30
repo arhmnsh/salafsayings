@@ -1351,15 +1351,15 @@ watch(bookmarkedIds, (next) => {
 
     <nav class="fixed inset-x-0 bottom-4 z-40">
       <div class="mx-auto flex w-[min(92vw,28rem)] items-end justify-center gap-3">
-        <div class="relative flex-1 overflow-hidden rounded-[2.2rem] border border-white/30 bg-[linear-gradient(180deg,rgba(255,255,255,0.34),rgba(255,255,255,0.14)_42%,rgba(255,255,255,0.08))] p-[0.38rem] shadow-[0_18px_48px_rgba(0,0,0,0.26),inset_0_1px_0_rgba(255,255,255,0.42)] backdrop-blur-[28px]">
-          <div class="pointer-events-none absolute inset-x-6 top-0 h-1/2 rounded-full bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.34),transparent_72%)]" />
-          <div class="relative flex items-stretch gap-1.5 rounded-[1.85rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.2),rgba(255,255,255,0.08)_45%,rgba(120,130,145,0.08))] p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.24)]">
+        <div class="relative flex-1 overflow-hidden rounded-[2.2rem] border border-cyan-100/35 bg-[radial-gradient(circle_at_18%_18%,rgba(255,255,255,0.48),transparent_26%),radial-gradient(circle_at_82%_28%,rgba(190,255,243,0.26),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.34),rgba(170,235,245,0.18)_48%,rgba(255,255,255,0.1))] p-[0.38rem] shadow-[0_18px_48px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.52)] backdrop-blur-[28px]">
+          <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_100%,rgba(255,255,255,0.16),transparent_58%)]" />
+          <div class="relative flex items-stretch gap-1.5 rounded-[1.85rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.18),rgba(255,255,255,0.06)_48%,rgba(125,211,252,0.08))] p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.28)]">
             <button
               type="button"
               aria-label="Home"
               class="relative flex min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-[1.45rem] px-3 py-2.5 transition"
               :class="viewMode === 'home'
-                ? 'border border-white/35 bg-[linear-gradient(180deg,rgba(255,255,255,0.42),rgba(255,255,255,0.2))] text-slate-950 shadow-[0_10px_22px_rgba(0,0,0,0.14),inset_0_1px_0_rgba(255,255,255,0.62)] backdrop-blur-[24px]'
+                ? 'border border-cyan-100/45 bg-[radial-gradient(circle_at_30%_25%,rgba(255,255,255,0.38),transparent_42%),linear-gradient(180deg,rgba(180,255,247,0.34),rgba(122,214,255,0.2)_52%,rgba(255,255,255,0.12))] text-slate-950 shadow-[0_10px_22px_rgba(0,0,0,0.14),inset_0_1px_0_rgba(255,255,255,0.58)] backdrop-blur-[24px]'
                 : 'text-white/82 hover:bg-white/[0.08] hover:text-white'"
               @click="viewMode = 'home'"
             >
@@ -1371,7 +1371,7 @@ watch(bookmarkedIds, (next) => {
               aria-label="Bookmarks"
               class="relative flex min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-[1.45rem] px-3 py-2.5 transition"
               :class="viewMode === 'bookmarks'
-                ? 'border border-white/35 bg-[linear-gradient(180deg,rgba(255,255,255,0.42),rgba(255,255,255,0.2))] text-slate-950 shadow-[0_10px_22px_rgba(0,0,0,0.14),inset_0_1px_0_rgba(255,255,255,0.62)] backdrop-blur-[24px]'
+                ? 'border border-cyan-100/45 bg-[radial-gradient(circle_at_30%_25%,rgba(255,255,255,0.38),transparent_42%),linear-gradient(180deg,rgba(180,255,247,0.34),rgba(122,214,255,0.2)_52%,rgba(255,255,255,0.12))] text-slate-950 shadow-[0_10px_22px_rgba(0,0,0,0.14),inset_0_1px_0_rgba(255,255,255,0.58)] backdrop-blur-[24px]'
                 : 'text-white/82 hover:bg-white/[0.08] hover:text-white'"
               @click="viewMode = 'bookmarks'"
             >
@@ -1383,7 +1383,7 @@ watch(bookmarkedIds, (next) => {
               aria-label="About"
               class="relative flex min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-[1.45rem] px-3 py-2.5 transition"
               :class="viewMode === 'about'
-                ? 'border border-white/35 bg-[linear-gradient(180deg,rgba(255,255,255,0.42),rgba(255,255,255,0.2))] text-slate-950 shadow-[0_10px_22px_rgba(0,0,0,0.14),inset_0_1px_0_rgba(255,255,255,0.62)] backdrop-blur-[24px]'
+                ? 'border border-cyan-100/45 bg-[radial-gradient(circle_at_30%_25%,rgba(255,255,255,0.38),transparent_42%),linear-gradient(180deg,rgba(180,255,247,0.34),rgba(122,214,255,0.2)_52%,rgba(255,255,255,0.12))] text-slate-950 shadow-[0_10px_22px_rgba(0,0,0,0.14),inset_0_1px_0_rgba(255,255,255,0.58)] backdrop-blur-[24px]'
                 : 'text-white/82 hover:bg-white/[0.08] hover:text-white'"
               @click="viewMode = 'about'"
             >
