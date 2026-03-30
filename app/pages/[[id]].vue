@@ -1207,7 +1207,7 @@ watch(bookmarkedIds, (next) => {
           </div>
         </section>
 
-        <div :class="cardMotionClass" :style="cardStyle">
+        <div class="pt-3 sm:pt-4" :class="cardMotionClass" :style="cardStyle">
           <article
             v-if="current && !isAboutView"
             :key="current.id"
