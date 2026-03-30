@@ -1342,20 +1342,24 @@ watch(bookmarkedIds, (next) => {
       </button>
     </div>
 
-    <div class="fixed bottom-20 left-1/2 z-30 -translate-x-1/2 rounded-full border border-white/20 bg-black/40 px-4 py-2 text-xs text-white/75">
-      {{ copied ? 'Copied' : linkCopied ? 'Link copied' : imageShared ? 'Image ready to share' : shared ? 'Shared' : shareError || (showFirstVisitHint ? 'Swipe up/down like TikTok' : 'Swipe, scroll, or use ↑ ↓') }}
+    <div
+      v-if="copied || linkCopied || imageShared || shared || shareError"
+      class="fixed bottom-24 left-1/2 z-30 -translate-x-1/2 rounded-full border border-white/18 bg-[linear-gradient(180deg,rgba(255,255,255,0.18),rgba(255,255,255,0.06))] px-4 py-2 text-xs text-white/80 shadow-[0_10px_24px_rgba(0,0,0,0.28)] backdrop-blur-2xl"
+    >
+      {{ copied ? 'Copied' : linkCopied ? 'Link copied' : imageShared ? 'Image ready to share' : shared ? 'Shared' : shareError }}
     </div>
 
     <nav class="fixed inset-x-0 bottom-4 z-40">
-      <div class="mx-auto w-[min(88vw,22rem)] rounded-[1.4rem] border border-white/20 bg-[linear-gradient(180deg,rgba(255,255,255,0.16),rgba(255,255,255,0.05))] p-1 shadow-[0_12px_30px_rgba(0,0,0,0.42)] backdrop-blur-2xl">
-        <div class="flex items-center gap-1 rounded-[1.15rem] bg-[linear-gradient(180deg,rgba(7,16,35,0.8),rgba(4,10,24,0.62))] px-1.5 py-1">
+      <div class="mx-auto w-[min(90vw,23rem)] rounded-[2rem] border border-white/20 bg-[linear-gradient(180deg,rgba(255,255,255,0.28),rgba(255,255,255,0.11)_45%,rgba(255,255,255,0.06))] p-[0.42rem] shadow-[0_18px_40px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.2)] backdrop-blur-3xl">
+        <div class="relative flex items-center gap-1.5 overflow-hidden rounded-[1.7rem] bg-[linear-gradient(180deg,rgba(219,234,254,0.24),rgba(148,163,184,0.12)_38%,rgba(15,23,42,0.16))] px-1.5 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.24)]">
+          <div class="pointer-events-none absolute inset-x-10 top-0 h-1/2 rounded-full bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.24),transparent_68%)]" />
         <button
           type="button"
           aria-label="Home"
-          class="flex h-10 flex-1 items-center justify-center rounded-[0.95rem] transition"
+          class="relative flex h-11 flex-1 items-center justify-center rounded-[1.25rem] transition"
           :class="viewMode === 'home'
-            ? 'bg-white/[0.14] text-amber-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.38)]'
-            : 'text-white/75 hover:bg-white/[0.08] hover:text-white'"
+            ? 'border border-white/30 bg-[linear-gradient(180deg,rgba(255,255,255,0.36),rgba(255,255,255,0.18))] text-slate-950 shadow-[0_10px_22px_rgba(255,255,255,0.1),inset_0_1px_0_rgba(255,255,255,0.52)] backdrop-blur-2xl'
+            : 'text-white/78 hover:bg-white/[0.08] hover:text-white'"
           @click="viewMode = 'home'"
         >
           <Home class="h-[18px] w-[18px]" />
@@ -1363,10 +1367,10 @@ watch(bookmarkedIds, (next) => {
         <button
           type="button"
           aria-label="Bookmarks"
-          class="flex h-10 flex-1 items-center justify-center rounded-[0.95rem] transition"
+          class="relative flex h-11 flex-1 items-center justify-center rounded-[1.25rem] transition"
           :class="viewMode === 'bookmarks'
-            ? 'bg-white/[0.14] text-amber-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.38)]'
-            : 'text-white/75 hover:bg-white/[0.08] hover:text-white'"
+            ? 'border border-white/30 bg-[linear-gradient(180deg,rgba(255,255,255,0.36),rgba(255,255,255,0.18))] text-slate-950 shadow-[0_10px_22px_rgba(255,255,255,0.1),inset_0_1px_0_rgba(255,255,255,0.52)] backdrop-blur-2xl'
+            : 'text-white/78 hover:bg-white/[0.08] hover:text-white'"
           @click="viewMode = 'bookmarks'"
         >
           <BookMarked class="h-[18px] w-[18px]" />
@@ -1374,10 +1378,10 @@ watch(bookmarkedIds, (next) => {
         <button
           type="button"
           aria-label="About"
-          class="flex h-10 flex-1 items-center justify-center rounded-[0.95rem] transition"
+          class="relative flex h-11 flex-1 items-center justify-center rounded-[1.25rem] transition"
           :class="viewMode === 'about'
-            ? 'bg-white/[0.14] text-amber-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.38)]'
-            : 'text-white/75 hover:bg-white/[0.08] hover:text-white'"
+            ? 'border border-white/30 bg-[linear-gradient(180deg,rgba(255,255,255,0.36),rgba(255,255,255,0.18))] text-slate-950 shadow-[0_10px_22px_rgba(255,255,255,0.1),inset_0_1px_0_rgba(255,255,255,0.52)] backdrop-blur-2xl'
+            : 'text-white/78 hover:bg-white/[0.08] hover:text-white'"
           @click="viewMode = 'about'"
         >
           <Info class="h-[18px] w-[18px]" />
