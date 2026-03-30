@@ -1315,59 +1315,53 @@ watch(bookmarkedIds, (next) => {
       </div>
     </main>
 
-    <div v-if="!isAboutView" class="fixed right-3 top-1/2 z-30 flex -translate-y-1/2 flex-col gap-4 sm:right-5">
-      <div class="rounded-[1.75rem] border border-white/10 bg-white/[0.03] p-1.5 backdrop-blur-xl">
-        <div class="flex flex-col gap-1.5" style="--liquid-side-size: 2.8rem;">
-          <button
-            class="relative flex h-[var(--liquid-side-size)] w-[var(--liquid-side-size)] items-center justify-center rounded-full border border-white/14 bg-white/[0.06] text-white/86 backdrop-blur-xl transition hover:bg-white/[0.1] disabled:cursor-not-allowed disabled:opacity-35"
-            :disabled="activeIndex === 0"
-            @click="move(-1)"
-          >
-            <ChevronUp class="h-5 w-5" />
-          </button>
-          <button
-            class="relative flex h-[var(--liquid-side-size)] w-[var(--liquid-side-size)] items-center justify-center rounded-full border border-white/14 bg-white/[0.06] text-white/86 backdrop-blur-xl transition hover:bg-white/[0.1] disabled:cursor-not-allowed disabled:opacity-35"
-            :disabled="activeIndex >= filteredSayings.length - 1"
-            @click="move(1)"
-          >
-            <ChevronDown class="h-5 w-5" />
-          </button>
-          <button
-            class="relative flex h-[var(--liquid-side-size)] w-[var(--liquid-side-size)] items-center justify-center rounded-full border border-white/14 bg-white/[0.06] text-white/86 backdrop-blur-xl transition hover:bg-white/[0.1]"
-            @click="shuffle"
-          >
-            <Shuffle class="h-5 w-5" />
-          </button>
-        </div>
+    <div v-if="!isAboutView" class="fixed right-3 top-1/2 z-30 flex -translate-y-1/2 flex-col sm:right-5">
+      <div class="flex flex-col gap-1.5">
+        <button
+          class="relative flex h-11 w-11 items-center justify-center rounded-full border border-white/14 bg-white/[0.05] text-white/84 backdrop-blur-xl transition hover:bg-white/[0.1] disabled:cursor-not-allowed disabled:opacity-35"
+          :disabled="activeIndex === 0"
+          @click="move(-1)"
+        >
+          <ChevronUp class="h-5 w-5" />
+        </button>
+        <button
+          class="relative flex h-11 w-11 items-center justify-center rounded-full border border-white/14 bg-white/[0.05] text-white/84 backdrop-blur-xl transition hover:bg-white/[0.1] disabled:cursor-not-allowed disabled:opacity-35"
+          :disabled="activeIndex >= filteredSayings.length - 1"
+          @click="move(1)"
+        >
+          <ChevronDown class="h-5 w-5" />
+        </button>
+        <button
+          class="relative flex h-11 w-11 items-center justify-center rounded-full border border-white/14 bg-white/[0.05] text-white/84 backdrop-blur-xl transition hover:bg-white/[0.1]"
+          @click="shuffle"
+        >
+          <Shuffle class="h-5 w-5" />
+        </button>
       </div>
-      <div class="rounded-[1.75rem] border border-white/10 bg-white/[0.03] p-1.5 backdrop-blur-xl">
-        <div class="flex flex-col gap-1.5" style="--liquid-side-size: 2.8rem;">
-          <button
-            class="relative flex h-[var(--liquid-side-size)] w-[var(--liquid-side-size)] items-center justify-center rounded-full border backdrop-blur-xl transition hover:bg-white/[0.1]"
-            :class="isCurrentBookmarked
-              ? 'border-amber-200/35 bg-amber-200/[0.12] text-amber-100'
-              : 'border-white/14 bg-white/[0.06] text-white/86'"
-            @click="toggleBookmarkCurrent"
-          >
-            <Bookmark class="h-5 w-5" />
-          </button>
-          <button
-            class="relative flex h-[var(--liquid-side-size)] w-[var(--liquid-side-size)] items-center justify-center rounded-full border border-white/14 bg-white/[0.06] text-white/86 backdrop-blur-xl transition hover:bg-white/[0.1]"
-            @click="showShareMenu = !showShareMenu"
-          >
-            <Share2 class="h-5 w-5" />
-          </button>
-        </div>
+      <div class="mt-4 flex flex-col gap-1.5">
+        <button
+          class="relative flex h-11 w-11 items-center justify-center rounded-full border backdrop-blur-xl transition hover:bg-white/[0.1]"
+          :class="isCurrentBookmarked
+            ? 'border-amber-200/35 bg-amber-200/[0.12] text-amber-100'
+            : 'border-white/14 bg-white/[0.05] text-white/84'"
+          @click="toggleBookmarkCurrent"
+        >
+          <Bookmark class="h-5 w-5" />
+        </button>
+        <button
+          class="relative flex h-11 w-11 items-center justify-center rounded-full border border-white/14 bg-white/[0.05] text-white/84 backdrop-blur-xl transition hover:bg-white/[0.1]"
+          @click="showShareMenu = !showShareMenu"
+        >
+          <Share2 class="h-5 w-5" />
+        </button>
       </div>
-      <div class="rounded-[1.75rem] border border-white/10 bg-white/[0.03] p-1.5 backdrop-blur-xl">
-        <div class="flex flex-col gap-1.5" style="--liquid-side-size: 2.8rem;">
-          <button
-            class="relative flex h-[var(--liquid-side-size)] w-[var(--liquid-side-size)] items-center justify-center rounded-full border border-white/14 bg-white/[0.06] text-white/86 backdrop-blur-xl transition hover:bg-white/[0.1]"
-            @click="reportCurrent"
-          >
-            <AlertTriangle class="h-5 w-5" />
-          </button>
-        </div>
+      <div class="mt-4 flex flex-col gap-1.5">
+        <button
+          class="relative flex h-11 w-11 items-center justify-center rounded-full border border-white/14 bg-white/[0.05] text-white/84 backdrop-blur-xl transition hover:bg-white/[0.1]"
+          @click="reportCurrent"
+        >
+          <AlertTriangle class="h-5 w-5" />
+        </button>
       </div>
     </div>
 
