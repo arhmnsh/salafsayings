@@ -1315,57 +1315,54 @@ watch(bookmarkedIds, (next) => {
       </div>
     </main>
 
-    <div v-if="!isAboutView" class="fixed right-3 top-1/2 z-30 flex -translate-y-1/2 flex-col gap-3 sm:right-5">
-      <div class="relative overflow-hidden rounded-[1.75rem] border border-cyan-100/35 bg-[radial-gradient(circle_at_18%_15%,rgba(255,255,255,0.36),transparent_30%),linear-gradient(180deg,rgba(245,250,255,0.3),rgba(164,214,230,0.18)_52%,rgba(255,255,255,0.08))] p-1.5 shadow-[0_12px_30px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.44)] backdrop-blur-2xl">
-        <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_100%,rgba(255,255,255,0.12),transparent_56%)]" />
-        <div class="relative flex flex-col gap-1.5" style="--liquid-side-size: 2.8rem;">
+    <div v-if="!isAboutView" class="fixed right-3 top-1/2 z-30 flex -translate-y-1/2 flex-col gap-4 sm:right-5">
+      <div class="rounded-[1.75rem] border border-white/10 bg-white/[0.03] p-1.5 backdrop-blur-xl">
+        <div class="flex flex-col gap-1.5" style="--liquid-side-size: 2.8rem;">
           <button
-            class="relative flex h-[var(--liquid-side-size)] w-[var(--liquid-side-size)] items-center justify-center rounded-full border border-cyan-100/45 bg-[radial-gradient(circle_at_30%_25%,rgba(255,255,255,0.42),transparent_42%),linear-gradient(180deg,rgba(180,255,247,0.4),rgba(122,214,255,0.25)_52%,rgba(255,255,255,0.12))] text-slate-950 shadow-[0_10px_22px_rgba(0,0,0,0.14),inset_0_1px_0_rgba(255,255,255,0.56)] transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-35 disabled:saturate-50"
+            class="relative flex h-[var(--liquid-side-size)] w-[var(--liquid-side-size)] items-center justify-center rounded-full border border-white/14 bg-white/[0.06] text-white/86 backdrop-blur-xl transition hover:bg-white/[0.1] disabled:cursor-not-allowed disabled:opacity-35"
             :disabled="activeIndex === 0"
             @click="move(-1)"
           >
             <ChevronUp class="h-5 w-5" />
           </button>
           <button
-            class="relative flex h-[var(--liquid-side-size)] w-[var(--liquid-side-size)] items-center justify-center rounded-full border border-cyan-100/45 bg-[radial-gradient(circle_at_30%_25%,rgba(255,255,255,0.42),transparent_42%),linear-gradient(180deg,rgba(180,255,247,0.4),rgba(122,214,255,0.25)_52%,rgba(255,255,255,0.12))] text-slate-950 shadow-[0_10px_22px_rgba(0,0,0,0.14),inset_0_1px_0_rgba(255,255,255,0.56)] transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-35 disabled:saturate-50"
+            class="relative flex h-[var(--liquid-side-size)] w-[var(--liquid-side-size)] items-center justify-center rounded-full border border-white/14 bg-white/[0.06] text-white/86 backdrop-blur-xl transition hover:bg-white/[0.1] disabled:cursor-not-allowed disabled:opacity-35"
             :disabled="activeIndex >= filteredSayings.length - 1"
             @click="move(1)"
           >
             <ChevronDown class="h-5 w-5" />
           </button>
-        </div>
-      </div>
-      <div class="relative overflow-hidden rounded-[1.75rem] border border-cyan-100/35 bg-[radial-gradient(circle_at_18%_15%,rgba(255,255,255,0.36),transparent_30%),linear-gradient(180deg,rgba(245,250,255,0.3),rgba(164,214,230,0.18)_52%,rgba(255,255,255,0.08))] p-1.5 shadow-[0_12px_30px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.44)] backdrop-blur-2xl">
-        <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_100%,rgba(255,255,255,0.12),transparent_56%)]" />
-        <div class="relative flex flex-col gap-1.5" style="--liquid-side-size: 2.8rem;">
           <button
-            class="relative flex h-[var(--liquid-side-size)] w-[var(--liquid-side-size)] items-center justify-center rounded-full border border-cyan-100/45 bg-[radial-gradient(circle_at_30%_25%,rgba(255,255,255,0.42),transparent_42%),linear-gradient(180deg,rgba(180,255,247,0.4),rgba(122,214,255,0.25)_52%,rgba(255,255,255,0.12))] text-slate-950 shadow-[0_10px_22px_rgba(0,0,0,0.14),inset_0_1px_0_rgba(255,255,255,0.56)] transition hover:scale-[1.02]"
+            class="relative flex h-[var(--liquid-side-size)] w-[var(--liquid-side-size)] items-center justify-center rounded-full border border-white/14 bg-white/[0.06] text-white/86 backdrop-blur-xl transition hover:bg-white/[0.1]"
             @click="shuffle"
           >
             <Shuffle class="h-5 w-5" />
           </button>
+        </div>
+      </div>
+      <div class="rounded-[1.75rem] border border-white/10 bg-white/[0.03] p-1.5 backdrop-blur-xl">
+        <div class="flex flex-col gap-1.5" style="--liquid-side-size: 2.8rem;">
           <button
-            class="relative flex h-[var(--liquid-side-size)] w-[var(--liquid-side-size)] items-center justify-center rounded-full border transition hover:scale-[1.02]"
+            class="relative flex h-[var(--liquid-side-size)] w-[var(--liquid-side-size)] items-center justify-center rounded-full border backdrop-blur-xl transition hover:bg-white/[0.1]"
             :class="isCurrentBookmarked
-              ? 'border-amber-200/70 bg-[radial-gradient(circle_at_30%_25%,rgba(255,255,255,0.34),transparent_42%),linear-gradient(180deg,rgba(253,230,138,0.42),rgba(251,191,36,0.22)_52%,rgba(255,255,255,0.12))] text-amber-950 shadow-[0_10px_22px_rgba(0,0,0,0.14),inset_0_1px_0_rgba(255,255,255,0.5)]'
-              : 'border-cyan-100/45 bg-[radial-gradient(circle_at_30%_25%,rgba(255,255,255,0.42),transparent_42%),linear-gradient(180deg,rgba(180,255,247,0.4),rgba(122,214,255,0.25)_52%,rgba(255,255,255,0.12))] text-slate-950 shadow-[0_10px_22px_rgba(0,0,0,0.14),inset_0_1px_0_rgba(255,255,255,0.56)]'"
+              ? 'border-amber-200/35 bg-amber-200/[0.12] text-amber-100'
+              : 'border-white/14 bg-white/[0.06] text-white/86'"
             @click="toggleBookmarkCurrent"
           >
             <Bookmark class="h-5 w-5" />
           </button>
-        </div>
-      </div>
-      <div class="relative overflow-hidden rounded-[1.75rem] border border-cyan-100/35 bg-[radial-gradient(circle_at_18%_15%,rgba(255,255,255,0.36),transparent_30%),linear-gradient(180deg,rgba(245,250,255,0.3),rgba(164,214,230,0.18)_52%,rgba(255,255,255,0.08))] p-1.5 shadow-[0_12px_30px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.44)] backdrop-blur-2xl">
-        <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_100%,rgba(255,255,255,0.12),transparent_56%)]" />
-        <div class="relative flex flex-col gap-1.5" style="--liquid-side-size: 2.8rem;">
           <button
-            class="relative flex h-[var(--liquid-side-size)] w-[var(--liquid-side-size)] items-center justify-center rounded-full border border-cyan-100/45 bg-[radial-gradient(circle_at_30%_25%,rgba(255,255,255,0.42),transparent_42%),linear-gradient(180deg,rgba(180,255,247,0.4),rgba(122,214,255,0.25)_52%,rgba(255,255,255,0.12))] text-slate-950 shadow-[0_10px_22px_rgba(0,0,0,0.14),inset_0_1px_0_rgba(255,255,255,0.56)] transition hover:scale-[1.02]"
+            class="relative flex h-[var(--liquid-side-size)] w-[var(--liquid-side-size)] items-center justify-center rounded-full border border-white/14 bg-white/[0.06] text-white/86 backdrop-blur-xl transition hover:bg-white/[0.1]"
             @click="showShareMenu = !showShareMenu"
           >
             <Share2 class="h-5 w-5" />
           </button>
+        </div>
+      </div>
+      <div class="rounded-[1.75rem] border border-white/10 bg-white/[0.03] p-1.5 backdrop-blur-xl">
+        <div class="flex flex-col gap-1.5" style="--liquid-side-size: 2.8rem;">
           <button
-            class="relative flex h-[var(--liquid-side-size)] w-[var(--liquid-side-size)] items-center justify-center rounded-full border border-cyan-100/45 bg-[radial-gradient(circle_at_30%_25%,rgba(255,255,255,0.42),transparent_42%),linear-gradient(180deg,rgba(180,255,247,0.4),rgba(122,214,255,0.25)_52%,rgba(255,255,255,0.12))] text-slate-950 shadow-[0_10px_22px_rgba(0,0,0,0.14),inset_0_1px_0_rgba(255,255,255,0.56)] transition hover:scale-[1.02]"
+            class="relative flex h-[var(--liquid-side-size)] w-[var(--liquid-side-size)] items-center justify-center rounded-full border border-white/14 bg-white/[0.06] text-white/86 backdrop-blur-xl transition hover:bg-white/[0.1]"
             @click="reportCurrent"
           >
             <AlertTriangle class="h-5 w-5" />
