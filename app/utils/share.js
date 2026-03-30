@@ -17,6 +17,34 @@ export const buildClipboardText = (item) => {
 export const isShareAbortError = (error) =>
   !!error && typeof error === 'object' && 'name' in error && error.name === 'AbortError'
 
+const isLoopbackHost = (hostname = '') =>
+  hostname === 'localhost' ||
+  hostname === '127.0.0.1' ||
+  hostname === '::1'
+
+export const canUseNativeShare = ({
+  navigatorObj = globalThis.navigator,
+  isSecureContextValue = globalThis.isSecureContext,
+  locationObj = globalThis.location
+} = {}) => {
+  if (!navigatorObj?.share) return false
+  if (isSecureContextValue) return true
+  return isLoopbackHost(locationObj?.hostname)
+}
+
+export const canUseNativeFileShare = (
+  files,
+  {
+    navigatorObj = globalThis.navigator,
+    isSecureContextValue = globalThis.isSecureContext,
+    locationObj = globalThis.location
+  } = {}
+) => {
+  if (!canUseNativeShare({ navigatorObj, isSecureContextValue, locationObj })) return false
+  if (typeof navigatorObj?.canShare !== 'function') return true
+  return navigatorObj.canShare({ files })
+}
+
 export const copyTextWithFallback = async (
   text,
   {

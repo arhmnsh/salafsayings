@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 
-import { buildClipboardText, buildQuoteUrl, buildSharePayload, copyTextWithFallback, isShareAbortError } from '../app/utils/share.js'
+import { buildClipboardText, buildQuoteUrl, buildSharePayload, canUseNativeFileShare, canUseNativeShare, copyTextWithFallback, isShareAbortError } from '../app/utils/share.js'
 
 test('buildSharePayload separates text and url', () => {
   const item = {
@@ -88,4 +88,61 @@ test('isShareAbortError only matches AbortError', () => {
   assert.equal(isShareAbortError({ name: 'AbortError' }), true)
   assert.equal(isShareAbortError({ name: 'TypeError' }), false)
   assert.equal(isShareAbortError(null), false)
+})
+
+test('canUseNativeShare requires secure context or loopback host', () => {
+  assert.equal(
+    canUseNativeShare({
+      navigatorObj: { share() {} },
+      isSecureContextValue: true,
+      locationObj: { hostname: 'salafsayings.arhmn.sh' }
+    }),
+    true
+  )
+
+  assert.equal(
+    canUseNativeShare({
+      navigatorObj: { share() {} },
+      isSecureContextValue: false,
+      locationObj: { hostname: 'localhost' }
+    }),
+    true
+  )
+
+  assert.equal(
+    canUseNativeShare({
+      navigatorObj: { share() {} },
+      isSecureContextValue: false,
+      locationObj: { hostname: '169.254.130.244' }
+    }),
+    false
+  )
+})
+
+test('canUseNativeFileShare respects native share availability and canShare', () => {
+  const file = { name: 'quote.png' }
+
+  assert.equal(
+    canUseNativeFileShare([file], {
+      navigatorObj: {
+        share() {},
+        canShare: ({ files }) => files[0] === file
+      },
+      isSecureContextValue: true,
+      locationObj: { hostname: 'salafsayings.arhmn.sh' }
+    }),
+    true
+  )
+
+  assert.equal(
+    canUseNativeFileShare([file], {
+      navigatorObj: {
+        share() {},
+        canShare: () => true
+      },
+      isSecureContextValue: false,
+      locationObj: { hostname: '169.254.130.244' }
+    }),
+    false
+  )
 })

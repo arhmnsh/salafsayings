@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { AlertTriangle, AtSign, Bookmark, BookMarked, ChevronDown, ChevronUp, Copy, Globe, Hash, Home, Image, Info, Link2, Mail, Search, Share2, Shuffle } from 'lucide-vue-next'
 import QRCode from 'qrcode'
-import { buildClipboardText, buildQuoteUrl, buildSharePayload, copyTextWithFallback, isShareAbortError } from '~/utils/share'
+import { buildClipboardText, buildQuoteUrl, buildSharePayload, canUseNativeFileShare, canUseNativeShare, copyTextWithFallback, isShareAbortError } from '~/utils/share'
 
 definePageMeta({ layout: false, key: 'salafsayings-feed' })
 const route = useRoute()
@@ -555,13 +555,10 @@ const shareCurrent = async () => {
   const payload = buildSharePayload(current.value)
 
   try {
-    if (navigator.share) {
+    if (canUseNativeShare()) {
       await navigator.share(payload)
       showShareMenu.value = false
-      shared.value = true
-      setTimeout(() => {
-        shared.value = false
-      }, 1200)
+      showShared()
       return
     }
   } catch (error) {
@@ -574,9 +571,9 @@ const shareCurrent = async () => {
   try {
     await copyTextWithFallback(buildClipboardText(current.value))
     showShareMenu.value = false
-    shared.value = true
+    copied.value = true
     setTimeout(() => {
-      shared.value = false
+      copied.value = false
     }, 1200)
   } catch {
     shareError.value = 'Share failed'
@@ -610,18 +607,12 @@ const showShared = () => {
 const getPublicQuoteUrl = (item: any) => buildQuoteUrl(item)
 
 const shareShareableImage = async (file: File, payload: ReturnType<typeof buildSharePayload>) => {
-  if (!navigator.share) return false
-
   const filePayload = {
     title: payload.title,
     files: [file]
   }
 
-  const supportsFileShare = typeof navigator.canShare === 'function'
-    ? navigator.canShare(filePayload)
-    : true
-
-  if (!supportsFileShare) return false
+  if (!canUseNativeFileShare([file])) return false
 
   await navigator.share(filePayload)
   return true
@@ -652,7 +643,7 @@ const shareImageCurrent = async () => {
   }
 
   try {
-    if (navigator.share) {
+    if (canUseNativeShare()) {
       await navigator.share(payload)
       showShareMenu.value = false
       showShared()
@@ -670,7 +661,9 @@ const shareImageCurrent = async () => {
     showShareMenu.value = false
     showLinkCopied()
   } catch {
-    shareError.value = 'Image share failed'
+    shareError.value = canUseNativeShare()
+      ? 'Image share failed'
+      : 'Image share needs HTTPS'
     setTimeout(() => {
       shareError.value = ''
     }, 1400)
@@ -686,27 +679,10 @@ const copyCurrentLink = async () => {
     await copyTextWithFallback(getPublicQuoteUrl(current.value))
     showLinkCopied()
   } catch {
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          title: buildSharePayload(current.value).title,
-          url: getPublicQuoteUrl(current.value)
-        })
-        showShared()
-        return
-      }
-    } catch (error) {
-      if (isShareAbortError(error)) return
-    }
-    try {
-      await copyTextWithFallback(buildClipboardText(current.value))
-      showShared()
-    } catch {
-      shareError.value = 'Copy failed'
-      setTimeout(() => {
-        shareError.value = ''
-      }, 1400)
-    }
+    shareError.value = 'Copy failed'
+    setTimeout(() => {
+      shareError.value = ''
+    }, 1400)
   }
 }
 
