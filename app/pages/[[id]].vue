@@ -1392,7 +1392,7 @@ watch(bookmarkedIds, (next) => {
         <button
           type="button"
           aria-label="Search"
-          class="relative flex h-[4.5rem] w-[4.5rem] shrink-0 items-center justify-center overflow-hidden rounded-full border border-cyan-100/45 bg-[radial-gradient(circle_at_30%_25%,rgba(255,255,255,0.42),transparent_42%),linear-gradient(180deg,rgba(180,255,247,0.42),rgba(122,214,255,0.28)_52%,rgba(255,255,255,0.14))] text-slate-950 shadow-[0_18px_34px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.52)] backdrop-blur-[28px] transition hover:scale-[1.02]"
+          class="relative flex h-[4.15rem] w-[4.15rem] shrink-0 items-center justify-center overflow-hidden rounded-full border border-cyan-100/45 bg-[radial-gradient(circle_at_30%_25%,rgba(255,255,255,0.42),transparent_42%),linear-gradient(180deg,rgba(180,255,247,0.42),rgba(122,214,255,0.28)_52%,rgba(255,255,255,0.14))] text-slate-950 shadow-[0_18px_34px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.52)] backdrop-blur-[28px] transition hover:scale-[1.02]"
           @click="showSearchPopup = true"
         >
           <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_100%,rgba(255,255,255,0.2),transparent_58%)]" />
