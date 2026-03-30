@@ -1110,11 +1110,12 @@ watch(bookmarkedIds, (next) => {
 
     <Teleport to="body">
       <div class="fixed inset-x-0 top-0 z-40 pointer-events-none">
-        <header class="pointer-events-auto mx-3 mt-3 flex items-center justify-between rounded-[1.35rem] border border-white/18 bg-[linear-gradient(135deg,rgba(255,255,255,0.2),rgba(255,255,255,0.06)_38%,rgba(10,18,36,0.24)_100%)] px-4 py-2.5 shadow-[0_18px_40px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.28)] backdrop-blur-xl sm:mx-6 sm:px-5 sm:py-3">
+        <header class="pointer-events-auto relative flex items-center justify-between overflow-hidden border-b border-white/12 bg-[linear-gradient(180deg,rgba(255,255,255,0.14),rgba(255,255,255,0.08)_22%,rgba(10,18,36,0.22)_72%,rgba(10,18,36,0.08))] px-5 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl sm:px-8 sm:py-3">
+          <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_-20%,rgba(255,255,255,0.22),transparent_32%),radial-gradient(circle_at_82%_0%,rgba(125,211,252,0.14),transparent_28%)]" />
           <div>
             <p class="font-mono text-[11px] uppercase tracking-[0.24em] text-white/78 sm:text-xs">Salaf Sayings</p>
           </div>
-          <div class="flex items-center gap-2">
+          <div class="relative flex items-center gap-2">
             <button
               class="rounded-full border border-white/20 bg-white/8 p-2 text-white/92 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] transition hover:bg-white/14"
               @click="showSearchPopup = true"
@@ -1128,7 +1129,7 @@ watch(bookmarkedIds, (next) => {
         </header>
         <div
           v-if="activeFilterItems.length"
-          class="pointer-events-auto bg-[linear-gradient(180deg,rgba(9,9,11,0.92),rgba(9,9,11,0.48),transparent)] px-5 pb-2 backdrop-blur-sm sm:px-8"
+          class="pointer-events-auto border-b border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(10,18,36,0.32)_58%,rgba(10,18,36,0.04))] px-5 pb-2 backdrop-blur-xl sm:px-8"
         >
           <div class="flex flex-wrap gap-2">
             <button
