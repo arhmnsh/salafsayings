@@ -1351,16 +1351,16 @@ watch(bookmarkedIds, (next) => {
 
     <nav class="fixed inset-x-0 bottom-4 z-40">
       <div class="mx-auto flex w-[min(92vw,28rem)] items-end justify-center gap-3">
-        <div class="relative flex-1 overflow-hidden rounded-[2.2rem] border border-cyan-100/35 bg-[radial-gradient(circle_at_18%_18%,rgba(255,255,255,0.48),transparent_26%),radial-gradient(circle_at_82%_28%,rgba(190,255,243,0.26),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.34),rgba(170,235,245,0.18)_48%,rgba(255,255,255,0.1))] p-[0.38rem] shadow-[0_18px_48px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.52)] backdrop-blur-[28px]">
-          <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_100%,rgba(255,255,255,0.16),transparent_58%)]" />
-          <div class="relative flex items-stretch gap-1.5 rounded-[1.85rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.18),rgba(255,255,255,0.06)_48%,rgba(125,211,252,0.08))] p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.28)]">
+        <div class="relative flex-1 overflow-hidden rounded-[2.2rem] border border-cyan-100/45 bg-[radial-gradient(circle_at_20%_18%,rgba(255,255,255,0.46),transparent_22%),radial-gradient(circle_at_78%_30%,rgba(196,255,245,0.24),transparent_24%),radial-gradient(circle_at_50%_100%,rgba(255,255,255,0.14),transparent_52%),linear-gradient(180deg,rgba(245,250,255,0.34),rgba(164,214,230,0.2)_52%,rgba(255,255,255,0.12))] px-2 py-2 shadow-[0_18px_48px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.56)] backdrop-blur-[28px]">
+          <div class="pointer-events-none absolute inset-0 rounded-[2.2rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.2),transparent_38%,rgba(255,255,255,0.04))]" />
+          <div class="relative flex items-stretch gap-1">
             <button
               type="button"
               aria-label="Home"
-              class="relative flex min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-[1.45rem] px-3 py-2.5 transition"
+              class="relative flex min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-[1.55rem] px-3 py-2.5 transition"
               :class="viewMode === 'home'
                 ? 'border border-cyan-100/45 bg-[radial-gradient(circle_at_30%_25%,rgba(255,255,255,0.38),transparent_42%),linear-gradient(180deg,rgba(180,255,247,0.34),rgba(122,214,255,0.2)_52%,rgba(255,255,255,0.12))] text-slate-950 shadow-[0_10px_22px_rgba(0,0,0,0.14),inset_0_1px_0_rgba(255,255,255,0.58)] backdrop-blur-[24px]'
-                : 'text-white/82 hover:bg-white/[0.08] hover:text-white'"
+                : 'text-slate-950/80 hover:bg-white/[0.1] hover:text-slate-950'"
               @click="viewMode = 'home'"
             >
               <Home class="h-[19px] w-[19px]" />
@@ -1369,10 +1369,10 @@ watch(bookmarkedIds, (next) => {
             <button
               type="button"
               aria-label="Bookmarks"
-              class="relative flex min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-[1.45rem] px-3 py-2.5 transition"
+              class="relative flex min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-[1.55rem] px-3 py-2.5 transition"
               :class="viewMode === 'bookmarks'
                 ? 'border border-cyan-100/45 bg-[radial-gradient(circle_at_30%_25%,rgba(255,255,255,0.38),transparent_42%),linear-gradient(180deg,rgba(180,255,247,0.34),rgba(122,214,255,0.2)_52%,rgba(255,255,255,0.12))] text-slate-950 shadow-[0_10px_22px_rgba(0,0,0,0.14),inset_0_1px_0_rgba(255,255,255,0.58)] backdrop-blur-[24px]'
-                : 'text-white/82 hover:bg-white/[0.08] hover:text-white'"
+                : 'text-slate-950/80 hover:bg-white/[0.1] hover:text-slate-950'"
               @click="viewMode = 'bookmarks'"
             >
               <BookMarked class="h-[19px] w-[19px]" />
@@ -1381,10 +1381,10 @@ watch(bookmarkedIds, (next) => {
             <button
               type="button"
               aria-label="About"
-              class="relative flex min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-[1.45rem] px-3 py-2.5 transition"
+              class="relative flex min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-[1.55rem] px-3 py-2.5 transition"
               :class="viewMode === 'about'
                 ? 'border border-cyan-100/45 bg-[radial-gradient(circle_at_30%_25%,rgba(255,255,255,0.38),transparent_42%),linear-gradient(180deg,rgba(180,255,247,0.34),rgba(122,214,255,0.2)_52%,rgba(255,255,255,0.12))] text-slate-950 shadow-[0_10px_22px_rgba(0,0,0,0.14),inset_0_1px_0_rgba(255,255,255,0.58)] backdrop-blur-[24px]'
-                : 'text-white/82 hover:bg-white/[0.08] hover:text-white'"
+                : 'text-slate-950/80 hover:bg-white/[0.1] hover:text-slate-950'"
               @click="viewMode = 'about'"
             >
               <Info class="h-[19px] w-[19px]" />
