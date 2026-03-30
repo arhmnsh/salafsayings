@@ -80,43 +80,69 @@ const createRenderer = () => (x, y, width, height) => {
   g += Math.round(glowA * 36 + glowB * 78)
   b += Math.round(glowA * 10 + glowB * 94)
 
-  const cardLeft = width * 0.17
-  const cardTop = height * 0.16
-  const cardWidth = width * 0.66
-  const cardHeight = height * 0.68
-  const radius = width * 0.08
+  const panelLeft = width * 0.18
+  const panelRight = width * 0.82
+  const panelTop = height * 0.18
+  const panelBottom = height * 0.82
+  const centerX = width * 0.5
+  const apexY = height * 0.12
 
-  const dx = Math.max(Math.abs(x - (cardLeft + cardWidth / 2)) - cardWidth / 2 + radius, 0)
-  const dy = Math.max(Math.abs(y - (cardTop + cardHeight / 2)) - cardHeight / 2 + radius, 0)
-  const inCard = dx * dx + dy * dy <= radius * radius
+  const inBody =
+    x >= panelLeft &&
+    x <= panelRight &&
+    y >= panelTop + height * 0.07 &&
+    y <= panelBottom
 
-  if (inCard) {
-    r = Math.round(r * 0.72 + 20)
-    g = Math.round(g * 0.74 + 22)
-    b = Math.round(b * 0.78 + 32)
+  const roofSlope = (panelTop + height * 0.07 - apexY) / (panelLeft - centerX)
+  const roofY = apexY + roofSlope * Math.abs(x - centerX)
+  const inRoof = x >= panelLeft && x <= panelRight && y >= roofY && y <= panelTop + height * 0.07
+  const inPanel = inBody || inRoof
+
+  if (inPanel) {
+    r = Math.round(r * 0.68 + 18)
+    g = Math.round(g * 0.72 + 24)
+    b = Math.round(b * 0.8 + 38)
   }
 
-  const quoteCenters = [
-    { x: width * 0.37, y: height * 0.42 },
-    { x: width * 0.56, y: height * 0.42 }
-  ]
+  const panelBorder =
+    (Math.abs(y - roofY) < width * 0.012 && x >= panelLeft && x <= panelRight && y <= panelTop + height * 0.07) ||
+    (Math.abs(x - panelLeft) < width * 0.012 && y >= panelTop + height * 0.07 && y <= panelBottom) ||
+    (Math.abs(x - panelRight) < width * 0.012 && y >= panelTop + height * 0.07 && y <= panelBottom) ||
+    (Math.abs(y - panelBottom) < width * 0.012 && x >= panelLeft && x <= panelRight)
 
-  for (const center of quoteCenters) {
-    const d = Math.hypot(x - center.x, y - center.y)
-    if (d < width * 0.095) {
-      r = 245
-      g = 209
-      b = 90
-    }
-    if (x > center.x - width * 0.035 && x < center.x + width * 0.012 && y > center.y && y < center.y + height * 0.16) {
-      r = 245
-      g = 209
-      b = 90
-    }
+  if (panelBorder) {
+    r = 222
+    g = 232
+    b = 255
   }
 
-  const footerY = height * 0.76
-  if (y > footerY && y < footerY + height * 0.03 && x > width * 0.22 && x < width * 0.78) {
+  const isInsideEllipse = (cx, cy, rx, ry) => {
+    const dx = (x - cx) / rx
+    const dy = (y - cy) / ry
+    return dx * dx + dy * dy <= 1
+  }
+
+  const isInsideArabicQuote = (cx, cy, scale, mirror = false) => {
+    const dot = isInsideEllipse(cx + (mirror ? scale * 0.12 : -scale * 0.12), cy + scale * 0.3, scale * 0.11, scale * 0.11)
+    const main = isInsideEllipse(cx, cy, scale * 0.22, scale * 0.28)
+    const cutout = isInsideEllipse(cx + (mirror ? -scale * 0.08 : scale * 0.08), cy - scale * 0.02, scale * 0.14, scale * 0.16)
+    const stem =
+      x >= cx - scale * 0.12 &&
+      x <= cx + scale * 0.02 &&
+      y >= cy + scale * 0.06 &&
+      y <= cy + scale * 0.42
+
+    return dot || ((main && !cutout) || stem)
+  }
+
+  if (isInsideArabicQuote(width * 0.39, height * 0.42, width * 0.22, false) || isInsideArabicQuote(width * 0.61, height * 0.42, width * 0.22, true)) {
+    r = 247
+    g = 210
+    b = 96
+  }
+
+  const dividerY = height * 0.73
+  if (y > dividerY && y < dividerY + height * 0.028 && x > width * 0.28 && x < width * 0.72) {
     r = 223
     g = 232
     b = 255
@@ -137,10 +163,12 @@ const faviconSvg = `<?xml version="1.0" encoding="UTF-8"?>
   <rect width="64" height="64" rx="16" fill="url(#bg)"/>
   <circle cx="20" cy="20" r="12" fill="#F59E0B" fill-opacity="0.3"/>
   <circle cx="54" cy="56" r="18" fill="#38BDF8" fill-opacity="0.26"/>
-  <rect x="12" y="11" width="40" height="42" rx="11" fill="#15213E" fill-opacity="0.88" stroke="rgba(255,255,255,0.22)"/>
-  <path d="M25 24c0-3.3 2.5-5.5 6.1-5.5v3.6c-1.6 0-2.4.8-2.4 2.4V31H22v-7z" fill="#FCD34D"/>
-  <path d="M39 24c0-3.3 2.5-5.5 6.1-5.5v3.6c-1.6 0-2.4.8-2.4 2.4V31H36v-7z" fill="#FCD34D"/>
-  <rect x="18" y="39" width="28" height="3" rx="1.5" fill="#DDE8FF" fill-opacity="0.9"/>
+  <path d="M16 49V23.5L32 10l16 13.5V49" fill="#15213E" fill-opacity="0.9" stroke="#DDE8FF" stroke-opacity="0.75" stroke-width="1.5" stroke-linejoin="round"/>
+  <path d="M24.5 24.5c0-4.4 3.1-7.2 7.3-7.2 0 2.7 0 2.7-.1 2.7-2.2 0-3.6 1.2-3.6 3.7v4.8h-4.6v-4z" fill="#FCD34D"/>
+  <circle cx="26.2" cy="31.4" r="1.65" fill="#FCD34D"/>
+  <path d="M39.5 24.5c0-4.4-3.1-7.2-7.3-7.2 0 2.7 0 2.7.1 2.7 2.2 0 3.6 1.2 3.6 3.7v4.8h4.6v-4z" fill="#FCD34D"/>
+  <circle cx="37.8" cy="31.4" r="1.65" fill="#FCD34D"/>
+  <rect x="21" y="39.5" width="22" height="2.8" rx="1.4" fill="#DDE8FF" fill-opacity="0.92"/>
 </svg>`
 
 fs.mkdirSync(publicDir, { recursive: true })
