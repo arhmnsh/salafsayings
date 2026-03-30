@@ -1110,26 +1110,18 @@ watch(bookmarkedIds, (next) => {
 
     <Teleport to="body">
       <div class="fixed inset-x-0 top-0 z-40 pointer-events-none">
-        <header class="pointer-events-auto flex items-center justify-between bg-[linear-gradient(180deg,rgba(9,9,11,0.95),rgba(9,9,11,0.65),transparent)] px-5 py-4 backdrop-blur-sm sm:px-8">
+        <header class="pointer-events-auto mx-3 mt-3 flex items-center justify-between rounded-[1.35rem] border border-white/18 bg-[linear-gradient(135deg,rgba(255,255,255,0.2),rgba(255,255,255,0.06)_38%,rgba(10,18,36,0.24)_100%)] px-4 py-2.5 shadow-[0_18px_40px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.28)] backdrop-blur-xl sm:mx-6 sm:px-5 sm:py-3">
           <div>
-            <p class="font-mono text-xs uppercase tracking-[0.2em] text-white/70">Salaf Sayings</p>
-            <a
-              href="https://arhmn.sh"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="mt-1 inline-block text-[11px] text-white/55 transition hover:text-white/85"
-            >
-              by AbdurRahaman Shah arhmn.sh
-            </a>
+            <p class="font-mono text-[11px] uppercase tracking-[0.24em] text-white/78 sm:text-xs">Salaf Sayings</p>
           </div>
           <div class="flex items-center gap-2">
             <button
-              class="rounded-full border border-white/20 bg-black/30 p-2 text-white/90 transition hover:bg-black/55"
+              class="rounded-full border border-white/20 bg-white/8 p-2 text-white/92 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] transition hover:bg-white/14"
               @click="showSearchPopup = true"
             >
               <Search class="h-4 w-4" />
             </button>
-            <div class="min-w-[6.5rem] rounded-full border border-white/20 bg-black/20 px-3 py-1 text-center font-mono text-xs tabular-nums text-white/80">
+            <div class="min-w-[5.75rem] rounded-full border border-white/20 bg-white/8 px-3 py-1 text-center font-mono text-[11px] tabular-nums text-white/82 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] sm:text-xs">
               {{ progressLabel }}
             </div>
           </div>
