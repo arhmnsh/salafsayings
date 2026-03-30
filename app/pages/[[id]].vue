@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { AlertTriangle, AtSign, Bookmark, BookMarked, ChevronDown, ChevronUp, Copy, Globe, Hash, Home, Image, Info, Link2, Mail, Search, Share2, Shuffle } from 'lucide-vue-next'
 import QRCode from 'qrcode'
+import { buildClipboardText, buildQuoteUrl, buildSharePayload, copyTextWithFallback, isShareAbortError } from '~/utils/share'
 
 definePageMeta({ layout: false, key: 'salafsayings-feed' })
 const route = useRoute()
@@ -532,55 +533,176 @@ const toggleBookmarkCurrent = () => {
 const copyCurrent = async () => {
   if (isAboutView.value) return
   if (!current.value || !import.meta.client) return
-  const shareUrl = getPublicQuoteUrl(current.value)
-  const payload = `"${current.value.quote}"${current.value.author ? ` — ${current.value.author}` : ''}\n${shareUrl}`
-  await navigator.clipboard.writeText(payload)
-  copied.value = true
-  setTimeout(() => {
-    copied.value = false
-  }, 1200)
-}
-
-const getPublicQuoteUrl = (item: any) => {
-  const idPart = item?.id || item?.slug || 'quote'
-  return `https://salafsayings.arhmn.sh/${idPart}`
-}
-
-const getShareText = (item: any) => {
-  const url = getPublicQuoteUrl(item)
-  return `"${item.quote}"${item.author ? ` — ${item.author}` : ''}\n${url}`
+  shareError.value = ''
+  try {
+    await copyTextWithFallback(buildClipboardText(current.value))
+    copied.value = true
+    setTimeout(() => {
+      copied.value = false
+    }, 1200)
+  } catch {
+    shareError.value = 'Copy failed'
+    setTimeout(() => {
+      shareError.value = ''
+    }, 1400)
+  }
 }
 
 const shareCurrent = async () => {
   if (isAboutView.value) return
   if (!current.value || !import.meta.client) return
   shareError.value = ''
-  const text = getShareText(current.value)
+  const payload = buildSharePayload(current.value)
 
   try {
     if (navigator.share) {
-      await navigator.share({
-        title: current.value.title || 'Salaf Saying',
-        text
-      })
-    } else {
-      await navigator.clipboard.writeText(text)
+      await navigator.share(payload)
+      showShareMenu.value = false
+      shared.value = true
+      setTimeout(() => {
+        shared.value = false
+      }, 1200)
+      return
     }
+  } catch (error) {
+    if (isShareAbortError(error)) {
+      showShareMenu.value = false
+      return
+    }
+  }
+
+  try {
+    await copyTextWithFallback(buildClipboardText(current.value))
     showShareMenu.value = false
     shared.value = true
     setTimeout(() => {
       shared.value = false
     }, 1200)
   } catch {
-    try {
-      await navigator.clipboard.writeText(text)
-      shared.value = true
-      setTimeout(() => {
-        shared.value = false
-      }, 1200)
+    shareError.value = 'Share failed'
+    setTimeout(() => {
+      shareError.value = ''
+    }, 1400)
+  }
+}
+
+const showLinkCopied = () => {
+  linkCopied.value = true
+  setTimeout(() => {
+    linkCopied.value = false
+  }, 1200)
+}
+
+const showImageShared = () => {
+  imageShared.value = true
+  setTimeout(() => {
+    imageShared.value = false
+  }, 1400)
+}
+
+const showShared = () => {
+  shared.value = true
+  setTimeout(() => {
+    shared.value = false
+  }, 1200)
+}
+
+const getPublicQuoteUrl = (item: any) => buildQuoteUrl(item)
+
+const shareShareableImage = async (file: File, payload: ReturnType<typeof buildSharePayload>) => {
+  if (!navigator.share) return false
+
+  const filePayload = {
+    title: payload.title,
+    files: [file]
+  }
+
+  const supportsFileShare = typeof navigator.canShare === 'function'
+    ? navigator.canShare(filePayload)
+    : true
+
+  if (!supportsFileShare) return false
+
+  await navigator.share(filePayload)
+  return true
+}
+
+const shareImageCurrent = async () => {
+  if (isAboutView.value) return
+  if (!current.value || !import.meta.client) return
+  shareError.value = ''
+  const blob = await renderShareImageBlob()
+  if (!blob) return
+
+  const file = new File([blob], `salaf-saying-${current.value.slug || current.value.id}.png`, { type: 'image/png' })
+  const payload = buildSharePayload(current.value)
+
+  try {
+    const didShareImage = await shareShareableImage(file, payload)
+    if (didShareImage) {
       showShareMenu.value = false
+      showImageShared()
+      return
+    }
+  } catch (error) {
+    if (isShareAbortError(error)) {
+      showShareMenu.value = false
+      return
+    }
+  }
+
+  try {
+    if (navigator.share) {
+      await navigator.share(payload)
+      showShareMenu.value = false
+      showShared()
+      return
+    }
+  } catch (error) {
+    if (isShareAbortError(error)) {
+      showShareMenu.value = false
+      return
+    }
+  }
+
+  try {
+    await copyTextWithFallback(payload.url)
+    showShareMenu.value = false
+    showLinkCopied()
+  } catch {
+    shareError.value = 'Image share failed'
+    setTimeout(() => {
+      shareError.value = ''
+    }, 1400)
+  }
+}
+
+const copyCurrentLink = async () => {
+  if (isAboutView.value) return
+  if (!current.value || !import.meta.client) return
+  showShareMenu.value = false
+  shareError.value = ''
+  try {
+    await copyTextWithFallback(getPublicQuoteUrl(current.value))
+    showLinkCopied()
+  } catch {
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: buildSharePayload(current.value).title,
+          url: getPublicQuoteUrl(current.value)
+        })
+        showShared()
+        return
+      }
+    } catch (error) {
+      if (isShareAbortError(error)) return
+    }
+    try {
+      await copyTextWithFallback(buildClipboardText(current.value))
+      showShared()
     } catch {
-      shareError.value = 'Share failed'
+      shareError.value = 'Copy failed'
       setTimeout(() => {
         shareError.value = ''
       }, 1400)
@@ -821,65 +943,6 @@ const renderShareImageBlob = async () => {
   return await new Promise<Blob | null>((resolve) => {
     canvas.toBlob((blob) => resolve(blob), 'image/png', 1)
   })
-}
-
-const shareImageCurrent = async () => {
-  if (isAboutView.value) return
-  if (!current.value || !import.meta.client) return
-  shareError.value = ''
-  const blob = await renderShareImageBlob()
-  if (!blob) return
-
-  const file = new File([blob], `salaf-saying-${current.value.slug || current.value.id}.png`, { type: 'image/png' })
-  try {
-    const shareText = getPublicQuoteUrl(current.value)
-    if (navigator.share && navigator.canShare?.({ files: [file] })) {
-      await navigator.share({
-        title: current.value.title || 'Salaf Saying',
-        text: shareText,
-        files: [file]
-      })
-    } else {
-      const objectUrl = URL.createObjectURL(blob)
-      const anchor = document.createElement('a')
-      anchor.href = objectUrl
-      anchor.download = file.name
-      document.body.appendChild(anchor)
-      anchor.click()
-      anchor.remove()
-      URL.revokeObjectURL(objectUrl)
-      await navigator.clipboard.writeText(shareText)
-    }
-    showShareMenu.value = false
-    imageShared.value = true
-    setTimeout(() => {
-      imageShared.value = false
-    }, 1400)
-  } catch {
-    shareError.value = 'Image share failed'
-    setTimeout(() => {
-      shareError.value = ''
-    }, 1400)
-  }
-}
-
-const copyCurrentLink = async () => {
-  if (isAboutView.value) return
-  if (!current.value || !import.meta.client) return
-  showShareMenu.value = false
-  shareError.value = ''
-  try {
-    await navigator.clipboard.writeText(getPublicQuoteUrl(current.value))
-    linkCopied.value = true
-    setTimeout(() => {
-      linkCopied.value = false
-    }, 1200)
-  } catch {
-    shareError.value = 'Copy failed'
-    setTimeout(() => {
-      shareError.value = ''
-    }, 1400)
-  }
 }
 
 const reportCurrent = () => {
