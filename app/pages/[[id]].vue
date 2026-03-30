@@ -1364,7 +1364,6 @@ watch(bookmarkedIds, (next) => {
               @click="viewMode = 'home'"
             >
               <Home class="h-[19px] w-[19px]" />
-              <span class="text-[11px] font-medium leading-none">Home</span>
             </button>
             <button
               type="button"
@@ -1376,7 +1375,6 @@ watch(bookmarkedIds, (next) => {
               @click="viewMode = 'bookmarks'"
             >
               <BookMarked class="h-[19px] w-[19px]" />
-              <span class="text-[11px] font-medium leading-none">Saved</span>
             </button>
             <button
               type="button"
@@ -1388,7 +1386,6 @@ watch(bookmarkedIds, (next) => {
               @click="viewMode = 'about'"
             >
               <Info class="h-[19px] w-[19px]" />
-              <span class="text-[11px] font-medium leading-none">About</span>
             </button>
           </div>
         </div>
