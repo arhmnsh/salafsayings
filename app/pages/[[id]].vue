@@ -1154,7 +1154,7 @@ watch(bookmarkedIds, (next) => {
 
     <main
       class="relative z-10 flex h-dvh items-start justify-center overflow-hidden px-5 pb-32 sm:px-8"
-      :class="activeFilterItems.length ? 'pt-[6.5rem]' : 'pt-[4.5rem]'"
+      :class="activeFilterItems.length ? 'pt-[4.9rem]' : 'pt-[2.9rem]'"
     >
       <div
         ref="contentScroller"
