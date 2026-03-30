@@ -70,50 +70,37 @@ const writePng = (filePath, width, height, drawPixel) => {
 const createRenderer = () => (x, y, width, height) => {
   const nx = x / (width - 1)
   const ny = y / (height - 1)
-  let r = Math.round(7 + 8 * nx)
-  let g = Math.round(11 + 16 * nx + 5 * ny)
-  let b = Math.round(24 + 28 * nx + 10 * ny)
 
-  const glowA = clamp(1 - Math.hypot(x - width * 0.2, y - height * 0.16) / (width * 0.32), 0, 1)
-  const glowB = clamp(1 - Math.hypot(x - width * 0.88, y - height * 0.86) / (width * 0.4), 0, 1)
-  r += Math.round(glowA * 72 + glowB * 18)
-  g += Math.round(glowA * 36 + glowB * 78)
-  b += Math.round(glowA * 10 + glowB * 94)
+  let r = Math.round(24 + 8 * nx)
+  let g = Math.round(35 + 10 * ny)
+  let b = Math.round(60 + 18 * nx + 8 * ny)
 
-  const panelLeft = width * 0.18
-  const panelRight = width * 0.82
-  const panelTop = height * 0.18
-  const panelBottom = height * 0.82
-  const centerX = width * 0.5
-  const apexY = height * 0.12
+  const vignette = clamp(1 - Math.hypot(nx - 0.5, ny - 0.5) / 0.78, 0, 1)
+  r += Math.round(vignette * 5)
+  g += Math.round(vignette * 6)
+  b += Math.round(vignette * 10)
 
-  const inBody =
-    x >= panelLeft &&
-    x <= panelRight &&
-    y >= panelTop + height * 0.07 &&
-    y <= panelBottom
+  const gold = [212, 168, 52]
+  const grid = [76, 91, 123]
 
-  const roofSlope = (panelTop + height * 0.07 - apexY) / (panelLeft - centerX)
-  const roofY = apexY + roofSlope * Math.abs(x - centerX)
-  const inRoof = x >= panelLeft && x <= panelRight && y >= roofY && y <= panelTop + height * 0.07
-  const inPanel = inBody || inRoof
+  const isInsideRoundedRect = (left, top, right, bottom, radius) => {
+    if (x < left || x > right || y < top || y > bottom) return false
+    if (x >= left + radius && x <= right - radius) return true
+    if (y >= top + radius && y <= bottom - radius) return true
 
-  if (inPanel) {
-    r = Math.round(r * 0.68 + 18)
-    g = Math.round(g * 0.72 + 24)
-    b = Math.round(b * 0.8 + 38)
+    const cx = x < left + radius ? left + radius : right - radius
+    const cy = y < top + radius ? top + radius : bottom - radius
+    return Math.hypot(x - cx, y - cy) <= radius
   }
 
-  const panelBorder =
-    (Math.abs(y - roofY) < width * 0.012 && x >= panelLeft && x <= panelRight && y <= panelTop + height * 0.07) ||
-    (Math.abs(x - panelLeft) < width * 0.012 && y >= panelTop + height * 0.07 && y <= panelBottom) ||
-    (Math.abs(x - panelRight) < width * 0.012 && y >= panelTop + height * 0.07 && y <= panelBottom) ||
-    (Math.abs(y - panelBottom) < width * 0.012 && x >= panelLeft && x <= panelRight)
-
-  if (panelBorder) {
-    r = 222
-    g = 232
-    b = 255
+  const drawRoundedLine = (x1, y1, x2, y2, thickness) => {
+    const dx = x2 - x1
+    const dy = y2 - y1
+    const lengthSq = dx * dx + dy * dy
+    const t = lengthSq === 0 ? 0 : clamp(((x - x1) * dx + (y - y1) * dy) / lengthSq, 0, 1)
+    const px = x1 + t * dx
+    const py = y1 + t * dy
+    return Math.hypot(x - px, y - py) <= thickness / 2
   }
 
   const isInsideEllipse = (cx, cy, rx, ry) => {
@@ -122,30 +109,80 @@ const createRenderer = () => (x, y, width, height) => {
     return dx * dx + dy * dy <= 1
   }
 
-  const isInsideArabicQuote = (cx, cy, scale, mirror = false) => {
-    const dot = isInsideEllipse(cx + (mirror ? scale * 0.12 : -scale * 0.12), cy + scale * 0.3, scale * 0.11, scale * 0.11)
-    const main = isInsideEllipse(cx, cy, scale * 0.22, scale * 0.28)
-    const cutout = isInsideEllipse(cx + (mirror ? -scale * 0.08 : scale * 0.08), cy - scale * 0.02, scale * 0.14, scale * 0.16)
-    const stem =
-      x >= cx - scale * 0.12 &&
-      x <= cx + scale * 0.02 &&
-      y >= cy + scale * 0.06 &&
-      y <= cy + scale * 0.42
+  const drawCorner = (corner) => {
+    const inset = width * 0.095
+    const arm = width * 0.12
+    const radius = width * 0.035
+    const stroke = width * 0.008
 
-    return dot || ((main && !cutout) || stem)
+    if (corner === 'top-right') {
+      return (
+        drawRoundedLine(width - inset - arm, inset, width - inset - radius, inset, stroke) ||
+        drawRoundedLine(width - inset, inset + radius, width - inset, inset + arm, stroke) ||
+        (Math.hypot(x - (width - inset - radius), y - (inset + radius)) <= radius + stroke / 2 &&
+          Math.hypot(x - (width - inset - radius), y - (inset + radius)) >= radius - stroke / 2 &&
+          x >= width - inset - radius &&
+          y <= inset + radius)
+      )
+    }
+
+    return (
+      drawRoundedLine(inset, height - inset - arm, inset, height - inset - radius, stroke) ||
+      drawRoundedLine(inset + radius, height - inset, inset + arm, height - inset, stroke) ||
+      (Math.hypot(x - (inset + radius), y - (height - inset - radius)) <= radius + stroke / 2 &&
+        Math.hypot(x - (inset + radius), y - (height - inset - radius)) >= radius - stroke / 2 &&
+        x <= inset + radius &&
+        y >= height - inset - radius)
+    )
   }
 
-  if (isInsideArabicQuote(width * 0.39, height * 0.42, width * 0.22, false) || isInsideArabicQuote(width * 0.61, height * 0.42, width * 0.22, true)) {
-    r = 247
-    g = 210
-    b = 96
+  const drawArabicQuote = (cx, cy, mirrored = false) => {
+    const scale = width * 0.154
+    const gap = scale * 0.16
+    const thickness = width * 0.018
+    const lift = scale * 0.9
+    const arcRadius = scale * 0.34
+    const dir = mirrored ? -1 : 1
+
+    const stemA = drawRoundedLine(cx - gap * dir, cy - lift * 0.65, cx - gap * dir, cy + lift * 0.1, thickness)
+    const stemB = drawRoundedLine(cx + gap * dir, cy - lift * 0.58, cx + gap * dir, cy + lift * 0.06, thickness)
+    const arcA = isInsideEllipse(cx - gap * dir + arcRadius * dir * 0.02, cy + lift * 0.07, arcRadius, arcRadius * 1.1) &&
+      !isInsideEllipse(cx - gap * dir + arcRadius * dir * 0.16, cy + lift * 0.01, arcRadius * 0.78, arcRadius * 0.84) &&
+      (mirrored ? x <= cx - gap * dir + arcRadius * 0.42 : x >= cx - gap * dir - arcRadius * 0.42)
+    const arcB = isInsideEllipse(cx + gap * dir + arcRadius * dir * 0.02, cy + lift * 0.03, arcRadius, arcRadius * 1.08) &&
+      !isInsideEllipse(cx + gap * dir + arcRadius * dir * 0.16, cy - lift * 0.02, arcRadius * 0.78, arcRadius * 0.84) &&
+      (mirrored ? x <= cx + gap * dir + arcRadius * 0.42 : x >= cx + gap * dir - arcRadius * 0.42)
+
+    return stemA || stemB || arcA || arcB
   }
 
-  const dividerY = height * 0.73
-  if (y > dividerY && y < dividerY + height * 0.028 && x > width * 0.28 && x < width * 0.72) {
-    r = 223
-    g = 232
-    b = 255
+  const innerPad = width * 0.03
+  if (!isInsideRoundedRect(innerPad, innerPad, width - innerPad, height - innerPad, width * 0.18)) {
+    return [0, 0, 0, 0]
+  }
+
+  const gridSpacing = width * 0.125
+  const dotRadius = width * 0.0036
+  const gx = Math.round((x - width * 0.04) / gridSpacing) * gridSpacing + width * 0.04
+  const gy = Math.round((y - height * 0.04) / gridSpacing) * gridSpacing + height * 0.04
+  if (Math.hypot(x - gx, y - gy) <= dotRadius) {
+    r = Math.round(r * 0.85 + grid[0] * 0.15)
+    g = Math.round(g * 0.84 + grid[1] * 0.16)
+    b = Math.round(b * 0.82 + grid[2] * 0.18)
+  }
+
+  if (drawCorner('top-right') || drawCorner('bottom-left')) {
+    return [gold[0], gold[1], gold[2], 255]
+  }
+
+  if (drawArabicQuote(width * 0.42, height * 0.44, false) || drawArabicQuote(width * 0.58, height * 0.44, true)) {
+    return [gold[0], gold[1], gold[2], 255]
+  }
+
+  const underlineA = drawRoundedLine(width * 0.39, height * 0.635, width * 0.63, height * 0.635, width * 0.01)
+  const underlineB = drawRoundedLine(width * 0.42, height * 0.675, width * 0.6, height * 0.675, width * 0.01)
+  if (underlineA || underlineB) {
+    return [gold[0], gold[1], gold[2], 255]
   }
 
   return [clamp(r, 0, 255), clamp(g, 0, 255), clamp(b, 0, 255), 255]
@@ -155,20 +192,31 @@ const faviconSvg = `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Salaf Sayings">
   <defs>
     <linearGradient id="bg" x1="8" y1="6" x2="56" y2="58" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#070B18"/>
-      <stop offset="0.58" stop-color="#0D1731"/>
-      <stop offset="1" stop-color="#0A1224"/>
+      <stop stop-color="#1B2740"/>
+      <stop offset="1" stop-color="#202D49"/>
     </linearGradient>
+    <pattern id="dots" width="7.5" height="7.5" patternUnits="userSpaceOnUse">
+      <circle cx="3.75" cy="3.75" r="0.34" fill="#53647F" fill-opacity="0.42"/>
+    </pattern>
   </defs>
   <rect width="64" height="64" rx="16" fill="url(#bg)"/>
-  <circle cx="20" cy="20" r="12" fill="#F59E0B" fill-opacity="0.3"/>
-  <circle cx="54" cy="56" r="18" fill="#38BDF8" fill-opacity="0.26"/>
-  <path d="M16 49V23.5L32 10l16 13.5V49" fill="#15213E" fill-opacity="0.9" stroke="#DDE8FF" stroke-opacity="0.75" stroke-width="1.5" stroke-linejoin="round"/>
-  <path d="M24.5 24.5c0-4.4 3.1-7.2 7.3-7.2 0 2.7 0 2.7-.1 2.7-2.2 0-3.6 1.2-3.6 3.7v4.8h-4.6v-4z" fill="#FCD34D"/>
-  <circle cx="26.2" cy="31.4" r="1.65" fill="#FCD34D"/>
-  <path d="M39.5 24.5c0-4.4-3.1-7.2-7.3-7.2 0 2.7 0 2.7.1 2.7 2.2 0 3.6 1.2 3.6 3.7v4.8h4.6v-4z" fill="#FCD34D"/>
-  <circle cx="37.8" cy="31.4" r="1.65" fill="#FCD34D"/>
-  <rect x="21" y="39.5" width="22" height="2.8" rx="1.4" fill="#DDE8FF" fill-opacity="0.92"/>
+  <rect width="64" height="64" rx="16" fill="url(#dots)"/>
+  <g fill="none" stroke="#C99B2E" stroke-width="1.25" stroke-linecap="round">
+    <path d="M47 6h5.5c2 0 3.5 1.5 3.5 3.5V15"/>
+    <path d="M8 49v5.5C8 56.5 9.5 58 11.5 58H17"/>
+  </g>
+  <g stroke="#D1A732" stroke-width="1.35" stroke-linecap="round" fill="none">
+    <path d="M23.5 21.5v9.2"/>
+    <path d="M24.6 21.5c2.5 0 4 1.6 4 4.1"/>
+    <path d="M24.6 30.4c2.7 0 4.2-1.7 4.2-4.4"/>
+    <path d="M39.4 21.5v9.2"/>
+    <path d="M37.9 30.5c2.8 0 4.3-1.8 4.3-4.6"/>
+    <path d="M38.2 30.5c2.2 0 3.5-1.4 3.5-4"/>
+  </g>
+  <g stroke="#C99B2E" stroke-width="1" stroke-linecap="round">
+    <path d="M22.5 40h17"/>
+    <path d="M24.5 42.5h13"/>
+  </g>
 </svg>`
 
 fs.mkdirSync(publicDir, { recursive: true })
