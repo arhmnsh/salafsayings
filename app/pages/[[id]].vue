@@ -1350,43 +1350,57 @@ watch(bookmarkedIds, (next) => {
     </div>
 
     <nav class="fixed inset-x-0 bottom-4 z-40">
-      <div class="mx-auto w-[min(90vw,23rem)] rounded-[2rem] border border-white/20 bg-[linear-gradient(180deg,rgba(255,255,255,0.28),rgba(255,255,255,0.11)_45%,rgba(255,255,255,0.06))] p-[0.42rem] shadow-[0_18px_40px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.2)] backdrop-blur-3xl">
-        <div class="relative flex items-center gap-1.5 overflow-hidden rounded-[1.7rem] bg-[linear-gradient(180deg,rgba(219,234,254,0.24),rgba(148,163,184,0.12)_38%,rgba(15,23,42,0.16))] px-1.5 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.24)]">
-          <div class="pointer-events-none absolute inset-x-10 top-0 h-1/2 rounded-full bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.24),transparent_68%)]" />
-        <button
-          type="button"
-          aria-label="Home"
-          class="relative flex h-11 flex-1 items-center justify-center rounded-[1.25rem] transition"
-          :class="viewMode === 'home'
-            ? 'border border-white/30 bg-[linear-gradient(180deg,rgba(255,255,255,0.36),rgba(255,255,255,0.18))] text-slate-950 shadow-[0_10px_22px_rgba(255,255,255,0.1),inset_0_1px_0_rgba(255,255,255,0.52)] backdrop-blur-2xl'
-            : 'text-white/78 hover:bg-white/[0.08] hover:text-white'"
-          @click="viewMode = 'home'"
-        >
-          <Home class="h-[18px] w-[18px]" />
-        </button>
-        <button
-          type="button"
-          aria-label="Bookmarks"
-          class="relative flex h-11 flex-1 items-center justify-center rounded-[1.25rem] transition"
-          :class="viewMode === 'bookmarks'
-            ? 'border border-white/30 bg-[linear-gradient(180deg,rgba(255,255,255,0.36),rgba(255,255,255,0.18))] text-slate-950 shadow-[0_10px_22px_rgba(255,255,255,0.1),inset_0_1px_0_rgba(255,255,255,0.52)] backdrop-blur-2xl'
-            : 'text-white/78 hover:bg-white/[0.08] hover:text-white'"
-          @click="viewMode = 'bookmarks'"
-        >
-          <BookMarked class="h-[18px] w-[18px]" />
-        </button>
-        <button
-          type="button"
-          aria-label="About"
-          class="relative flex h-11 flex-1 items-center justify-center rounded-[1.25rem] transition"
-          :class="viewMode === 'about'
-            ? 'border border-white/30 bg-[linear-gradient(180deg,rgba(255,255,255,0.36),rgba(255,255,255,0.18))] text-slate-950 shadow-[0_10px_22px_rgba(255,255,255,0.1),inset_0_1px_0_rgba(255,255,255,0.52)] backdrop-blur-2xl'
-            : 'text-white/78 hover:bg-white/[0.08] hover:text-white'"
-          @click="viewMode = 'about'"
-        >
-          <Info class="h-[18px] w-[18px]" />
-        </button>
+      <div class="mx-auto flex w-[min(92vw,28rem)] items-end justify-center gap-3">
+        <div class="relative flex-1 overflow-hidden rounded-[2.2rem] border border-white/30 bg-[linear-gradient(180deg,rgba(255,255,255,0.34),rgba(255,255,255,0.14)_42%,rgba(255,255,255,0.08))] p-[0.38rem] shadow-[0_18px_48px_rgba(0,0,0,0.26),inset_0_1px_0_rgba(255,255,255,0.42)] backdrop-blur-[28px]">
+          <div class="pointer-events-none absolute inset-x-6 top-0 h-1/2 rounded-full bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.34),transparent_72%)]" />
+          <div class="relative flex items-stretch gap-1.5 rounded-[1.85rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.2),rgba(255,255,255,0.08)_45%,rgba(120,130,145,0.08))] p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.24)]">
+            <button
+              type="button"
+              aria-label="Home"
+              class="relative flex min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-[1.45rem] px-3 py-2.5 transition"
+              :class="viewMode === 'home'
+                ? 'border border-white/35 bg-[linear-gradient(180deg,rgba(255,255,255,0.42),rgba(255,255,255,0.2))] text-slate-950 shadow-[0_10px_22px_rgba(0,0,0,0.14),inset_0_1px_0_rgba(255,255,255,0.62)] backdrop-blur-[24px]'
+                : 'text-white/82 hover:bg-white/[0.08] hover:text-white'"
+              @click="viewMode = 'home'"
+            >
+              <Home class="h-[19px] w-[19px]" />
+              <span class="text-[11px] font-medium leading-none">Home</span>
+            </button>
+            <button
+              type="button"
+              aria-label="Bookmarks"
+              class="relative flex min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-[1.45rem] px-3 py-2.5 transition"
+              :class="viewMode === 'bookmarks'
+                ? 'border border-white/35 bg-[linear-gradient(180deg,rgba(255,255,255,0.42),rgba(255,255,255,0.2))] text-slate-950 shadow-[0_10px_22px_rgba(0,0,0,0.14),inset_0_1px_0_rgba(255,255,255,0.62)] backdrop-blur-[24px]'
+                : 'text-white/82 hover:bg-white/[0.08] hover:text-white'"
+              @click="viewMode = 'bookmarks'"
+            >
+              <BookMarked class="h-[19px] w-[19px]" />
+              <span class="text-[11px] font-medium leading-none">Saved</span>
+            </button>
+            <button
+              type="button"
+              aria-label="About"
+              class="relative flex min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-[1.45rem] px-3 py-2.5 transition"
+              :class="viewMode === 'about'
+                ? 'border border-white/35 bg-[linear-gradient(180deg,rgba(255,255,255,0.42),rgba(255,255,255,0.2))] text-slate-950 shadow-[0_10px_22px_rgba(0,0,0,0.14),inset_0_1px_0_rgba(255,255,255,0.62)] backdrop-blur-[24px]'
+                : 'text-white/82 hover:bg-white/[0.08] hover:text-white'"
+              @click="viewMode = 'about'"
+            >
+              <Info class="h-[19px] w-[19px]" />
+              <span class="text-[11px] font-medium leading-none">About</span>
+            </button>
+          </div>
         </div>
+        <button
+          type="button"
+          aria-label="Search"
+          class="relative flex h-[4.5rem] w-[4.5rem] shrink-0 items-center justify-center overflow-hidden rounded-full border border-cyan-100/45 bg-[radial-gradient(circle_at_30%_25%,rgba(255,255,255,0.42),transparent_42%),linear-gradient(180deg,rgba(180,255,247,0.42),rgba(122,214,255,0.28)_52%,rgba(255,255,255,0.14))] text-slate-950 shadow-[0_18px_34px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.52)] backdrop-blur-[28px] transition hover:scale-[1.02]"
+          @click="showSearchPopup = true"
+        >
+          <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_100%,rgba(255,255,255,0.2),transparent_58%)]" />
+          <Search class="relative h-7 w-7" />
+        </button>
       </div>
     </nav>
 
