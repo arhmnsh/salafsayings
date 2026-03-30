@@ -1252,48 +1252,63 @@ watch(bookmarkedIds, (next) => {
       </div>
     </main>
 
-    <div v-if="!isAboutView" class="fixed right-4 top-1/2 z-30 flex -translate-y-1/2 flex-col gap-3 sm:right-6">
-      <button
-        class="rounded-full border border-white/20 bg-black/35 p-3 text-white/90 transition hover:bg-black/60 disabled:cursor-not-allowed disabled:opacity-40"
-        :disabled="activeIndex === 0"
-        @click="move(-1)"
-      >
-        <ChevronUp class="h-5 w-5" />
-      </button>
-      <button
-        class="rounded-full border border-white/20 bg-black/35 p-3 text-white/90 transition hover:bg-black/60 disabled:cursor-not-allowed disabled:opacity-40"
-        :disabled="activeIndex >= filteredSayings.length - 1"
-        @click="move(1)"
-      >
-        <ChevronDown class="h-5 w-5" />
-      </button>
-      <button
-        class="rounded-full border border-white/20 bg-black/35 p-3 text-white/90 transition hover:bg-black/60"
-        @click="shuffle"
-      >
-        <Shuffle class="h-5 w-5" />
-      </button>
-      <button
-        class="rounded-full border p-3 transition"
-        :class="isCurrentBookmarked
-          ? 'border-amber-200/70 bg-amber-200/20 text-amber-100 hover:bg-amber-200/30'
-          : 'border-white/20 bg-black/35 text-white/90 hover:bg-black/60'"
-        @click="toggleBookmarkCurrent"
-      >
-        <Bookmark class="h-5 w-5" />
-      </button>
-      <button
-        class="rounded-full border border-white/20 bg-black/35 p-3 text-white/90 transition hover:bg-black/60"
-        @click="showShareMenu = !showShareMenu"
-      >
-        <Share2 class="h-5 w-5" />
-      </button>
-      <button
-        class="rounded-full border border-white/20 bg-black/35 p-3 text-white/90 transition hover:bg-black/60"
-        @click="reportCurrent"
-      >
-        <AlertTriangle class="h-5 w-5" />
-      </button>
+    <div v-if="!isAboutView" class="fixed right-3 top-1/2 z-30 flex -translate-y-1/2 flex-col gap-3 sm:right-5">
+      <div class="relative overflow-hidden rounded-[1.75rem] border border-cyan-100/35 bg-[radial-gradient(circle_at_18%_15%,rgba(255,255,255,0.36),transparent_30%),linear-gradient(180deg,rgba(245,250,255,0.3),rgba(164,214,230,0.18)_52%,rgba(255,255,255,0.08))] p-1.5 shadow-[0_12px_30px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.44)] backdrop-blur-2xl">
+        <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_100%,rgba(255,255,255,0.12),transparent_56%)]" />
+        <div class="relative flex flex-col gap-1.5" style="--liquid-side-size: 2.8rem;">
+          <button
+            class="relative flex h-[var(--liquid-side-size)] w-[var(--liquid-side-size)] items-center justify-center rounded-full border border-cyan-100/45 bg-[radial-gradient(circle_at_30%_25%,rgba(255,255,255,0.42),transparent_42%),linear-gradient(180deg,rgba(180,255,247,0.4),rgba(122,214,255,0.25)_52%,rgba(255,255,255,0.12))] text-slate-950 shadow-[0_10px_22px_rgba(0,0,0,0.14),inset_0_1px_0_rgba(255,255,255,0.56)] transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-35 disabled:saturate-50"
+            :disabled="activeIndex === 0"
+            @click="move(-1)"
+          >
+            <ChevronUp class="h-5 w-5" />
+          </button>
+          <button
+            class="relative flex h-[var(--liquid-side-size)] w-[var(--liquid-side-size)] items-center justify-center rounded-full border border-cyan-100/45 bg-[radial-gradient(circle_at_30%_25%,rgba(255,255,255,0.42),transparent_42%),linear-gradient(180deg,rgba(180,255,247,0.4),rgba(122,214,255,0.25)_52%,rgba(255,255,255,0.12))] text-slate-950 shadow-[0_10px_22px_rgba(0,0,0,0.14),inset_0_1px_0_rgba(255,255,255,0.56)] transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-35 disabled:saturate-50"
+            :disabled="activeIndex >= filteredSayings.length - 1"
+            @click="move(1)"
+          >
+            <ChevronDown class="h-5 w-5" />
+          </button>
+        </div>
+      </div>
+      <div class="relative overflow-hidden rounded-[1.75rem] border border-cyan-100/35 bg-[radial-gradient(circle_at_18%_15%,rgba(255,255,255,0.36),transparent_30%),linear-gradient(180deg,rgba(245,250,255,0.3),rgba(164,214,230,0.18)_52%,rgba(255,255,255,0.08))] p-1.5 shadow-[0_12px_30px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.44)] backdrop-blur-2xl">
+        <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_100%,rgba(255,255,255,0.12),transparent_56%)]" />
+        <div class="relative flex flex-col gap-1.5" style="--liquid-side-size: 2.8rem;">
+          <button
+            class="relative flex h-[var(--liquid-side-size)] w-[var(--liquid-side-size)] items-center justify-center rounded-full border border-cyan-100/45 bg-[radial-gradient(circle_at_30%_25%,rgba(255,255,255,0.42),transparent_42%),linear-gradient(180deg,rgba(180,255,247,0.4),rgba(122,214,255,0.25)_52%,rgba(255,255,255,0.12))] text-slate-950 shadow-[0_10px_22px_rgba(0,0,0,0.14),inset_0_1px_0_rgba(255,255,255,0.56)] transition hover:scale-[1.02]"
+            @click="shuffle"
+          >
+            <Shuffle class="h-5 w-5" />
+          </button>
+          <button
+            class="relative flex h-[var(--liquid-side-size)] w-[var(--liquid-side-size)] items-center justify-center rounded-full border transition hover:scale-[1.02]"
+            :class="isCurrentBookmarked
+              ? 'border-amber-200/70 bg-[radial-gradient(circle_at_30%_25%,rgba(255,255,255,0.34),transparent_42%),linear-gradient(180deg,rgba(253,230,138,0.42),rgba(251,191,36,0.22)_52%,rgba(255,255,255,0.12))] text-amber-950 shadow-[0_10px_22px_rgba(0,0,0,0.14),inset_0_1px_0_rgba(255,255,255,0.5)]'
+              : 'border-cyan-100/45 bg-[radial-gradient(circle_at_30%_25%,rgba(255,255,255,0.42),transparent_42%),linear-gradient(180deg,rgba(180,255,247,0.4),rgba(122,214,255,0.25)_52%,rgba(255,255,255,0.12))] text-slate-950 shadow-[0_10px_22px_rgba(0,0,0,0.14),inset_0_1px_0_rgba(255,255,255,0.56)]'"
+            @click="toggleBookmarkCurrent"
+          >
+            <Bookmark class="h-5 w-5" />
+          </button>
+        </div>
+      </div>
+      <div class="relative overflow-hidden rounded-[1.75rem] border border-cyan-100/35 bg-[radial-gradient(circle_at_18%_15%,rgba(255,255,255,0.36),transparent_30%),linear-gradient(180deg,rgba(245,250,255,0.3),rgba(164,214,230,0.18)_52%,rgba(255,255,255,0.08))] p-1.5 shadow-[0_12px_30px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.44)] backdrop-blur-2xl">
+        <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_100%,rgba(255,255,255,0.12),transparent_56%)]" />
+        <div class="relative flex flex-col gap-1.5" style="--liquid-side-size: 2.8rem;">
+          <button
+            class="relative flex h-[var(--liquid-side-size)] w-[var(--liquid-side-size)] items-center justify-center rounded-full border border-cyan-100/45 bg-[radial-gradient(circle_at_30%_25%,rgba(255,255,255,0.42),transparent_42%),linear-gradient(180deg,rgba(180,255,247,0.4),rgba(122,214,255,0.25)_52%,rgba(255,255,255,0.12))] text-slate-950 shadow-[0_10px_22px_rgba(0,0,0,0.14),inset_0_1px_0_rgba(255,255,255,0.56)] transition hover:scale-[1.02]"
+            @click="showShareMenu = !showShareMenu"
+          >
+            <Share2 class="h-5 w-5" />
+          </button>
+          <button
+            class="relative flex h-[var(--liquid-side-size)] w-[var(--liquid-side-size)] items-center justify-center rounded-full border border-cyan-100/45 bg-[radial-gradient(circle_at_30%_25%,rgba(255,255,255,0.42),transparent_42%),linear-gradient(180deg,rgba(180,255,247,0.4),rgba(122,214,255,0.25)_52%,rgba(255,255,255,0.12))] text-slate-950 shadow-[0_10px_22px_rgba(0,0,0,0.14),inset_0_1px_0_rgba(255,255,255,0.56)] transition hover:scale-[1.02]"
+            @click="reportCurrent"
+          >
+            <AlertTriangle class="h-5 w-5" />
+          </button>
+        </div>
+      </div>
     </div>
 
     <div
@@ -1304,13 +1319,13 @@ watch(bookmarkedIds, (next) => {
 
     <div
       v-if="showShareMenu && !isAboutView"
-      class="fixed right-20 top-1/2 z-30 flex -translate-y-1/2 flex-col gap-2 rounded-xl border border-white/20 bg-black/70 p-2 backdrop-blur-md"
+      class="fixed right-20 top-1/2 z-30 flex -translate-y-1/2 flex-col gap-2 rounded-2xl border border-cyan-100/35 bg-[linear-gradient(180deg,rgba(245,250,255,0.28),rgba(164,214,230,0.16)_52%,rgba(255,255,255,0.08))] p-2.5 shadow-[0_18px_34px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.48)] backdrop-blur-2xl"
       data-share-menu
       @click.stop
     >
       <button
         type="button"
-        class="flex items-center gap-2 rounded-lg px-3 py-2 text-left text-xs text-white/90 transition hover:bg-white/10"
+        class="flex items-center gap-2 rounded-xl border border-transparent px-3 py-2 text-left text-xs text-slate-950/85 transition hover:border-cyan-100/35 hover:bg-white/20"
         @click.stop="shareCurrent()"
       >
         <Share2 class="h-4 w-4" />
@@ -1318,7 +1333,7 @@ watch(bookmarkedIds, (next) => {
       </button>
       <button
         type="button"
-        class="flex items-center gap-2 rounded-lg px-3 py-2 text-left text-xs text-white/90 transition hover:bg-white/10"
+        class="flex items-center gap-2 rounded-xl border border-transparent px-3 py-2 text-left text-xs text-slate-950/85 transition hover:border-cyan-100/35 hover:bg-white/20"
         @click.stop="copyCurrent(); showShareMenu = false"
       >
         <Copy class="h-4 w-4" />
@@ -1326,7 +1341,7 @@ watch(bookmarkedIds, (next) => {
       </button>
       <button
         type="button"
-        class="flex items-center gap-2 rounded-lg px-3 py-2 text-left text-xs text-white/90 transition hover:bg-white/10"
+        class="flex items-center gap-2 rounded-xl border border-transparent px-3 py-2 text-left text-xs text-slate-950/85 transition hover:border-cyan-100/35 hover:bg-white/20"
         @click.stop="shareImageCurrent()"
       >
         <Image class="h-4 w-4" />
@@ -1334,7 +1349,7 @@ watch(bookmarkedIds, (next) => {
       </button>
       <button
         type="button"
-        class="flex items-center gap-2 rounded-lg px-3 py-2 text-left text-xs text-white/90 transition hover:bg-white/10"
+        class="flex items-center gap-2 rounded-xl border border-transparent px-3 py-2 text-left text-xs text-slate-950/85 transition hover:border-cyan-100/35 hover:bg-white/20"
         @click.stop="copyCurrentLink()"
       >
         <Link2 class="h-4 w-4" />
