@@ -1153,7 +1153,7 @@ watch(bookmarkedIds, (next) => {
     <div class="pointer-events-none absolute inset-0 bg-[linear-gradient(0deg,rgba(17,24,39,0.9),rgba(17,24,39,0.18)_45%,rgba(17,24,39,0.9))]" />
 
     <Teleport to="body">
-      <div class="fixed inset-x-0 top-0 z-40 pointer-events-none" :class="showSearchPopup ? 'pointer-events-none' : ''">
+      <div class="fixed inset-x-0 top-0 z-40 pointer-events-none" :inert="showSearchPopup">
         <header class="pointer-events-auto relative flex items-center justify-between overflow-hidden bg-[linear-gradient(180deg,rgba(255,255,255,0.14),rgba(255,255,255,0.08)_22%,rgba(10,18,36,0.22)_72%,rgba(10,18,36,0.08))] px-5 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl sm:px-8 sm:py-3">
           <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_-20%,rgba(255,255,255,0.22),transparent_32%),radial-gradient(circle_at_82%_0%,rgba(125,211,252,0.14),transparent_28%)]" />
           <div>
@@ -1193,6 +1193,7 @@ watch(bookmarkedIds, (next) => {
     <main
       class="relative z-10 flex h-dvh items-start justify-center overflow-hidden px-5 pb-32 sm:px-8"
       :class="activeFilterItems.length ? 'pt-[4.9rem]' : 'pt-[2.9rem]'"
+      :inert="showSearchPopup"
     >
       <div
         ref="contentScroller"
@@ -1290,7 +1291,7 @@ watch(bookmarkedIds, (next) => {
       </div>
     </main>
 
-    <div v-if="!isAboutView" class="fixed right-3 top-1/2 z-30 flex -translate-y-1/2 flex-col sm:right-5" :class="showSearchPopup ? 'pointer-events-none' : ''">
+    <div v-if="!isAboutView" class="fixed right-3 top-1/2 z-30 flex -translate-y-1/2 flex-col sm:right-5" :inert="showSearchPopup">
       <div class="flex flex-col gap-1.5">
         <button
           class="relative flex h-11 w-11 items-center justify-center rounded-full border border-white/14 bg-white/[0.05] text-white/84 backdrop-blur-xl transition hover:bg-white/[0.1] disabled:cursor-not-allowed disabled:opacity-35"
@@ -1393,7 +1394,7 @@ watch(bookmarkedIds, (next) => {
       {{ copied ? 'Copied' : linkCopied ? 'Link copied' : imageShared ? 'Image ready to share' : shared ? 'Shared' : shareError }}
     </div>
 
-    <nav class="fixed inset-x-0 bottom-4 z-40" :class="showSearchPopup ? 'pointer-events-none' : ''">
+    <nav class="fixed inset-x-0 bottom-4 z-40" :inert="showSearchPopup">
       <div class="mx-auto flex w-[min(92vw,28rem)] items-center justify-center gap-3" style="--liquid-nav-size: 4.15rem;">
         <div class="relative h-[var(--liquid-nav-size)] flex-1 overflow-hidden rounded-[2.2rem] border border-cyan-100/45 bg-[radial-gradient(circle_at_20%_18%,rgba(255,255,255,0.46),transparent_22%),radial-gradient(circle_at_78%_30%,rgba(196,255,245,0.24),transparent_24%),radial-gradient(circle_at_50%_100%,rgba(255,255,255,0.14),transparent_52%),linear-gradient(180deg,rgba(245,250,255,0.34),rgba(164,214,230,0.2)_52%,rgba(255,255,255,0.12))] p-[0.28rem] shadow-[0_18px_48px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.56)] backdrop-blur-[28px]">
           <div class="pointer-events-none absolute inset-0 rounded-[2.2rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.2),transparent_38%,rgba(255,255,255,0.04))]" />
