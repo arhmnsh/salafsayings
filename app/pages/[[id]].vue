@@ -23,6 +23,7 @@ type QueryToken = {
   normalized?: string
 }
 type ViewMode = 'home' | 'bookmarks' | 'about'
+const tabModes: ViewMode[] = ['home', 'bookmarks', 'about']
 
 const normalizeTagText = (value: string) =>
   value
@@ -234,6 +235,10 @@ const isAboutView = computed(() => viewMode.value === 'about')
 const progressLabel = computed(() =>
   filteredSayings.value.length === 0 ? '0 / 0' : `${activeIndex.value + 1} / ${filteredSayings.value.length}`
 )
+const selectedTabIndex = computed(() => Math.max(tabModes.indexOf(viewMode.value), 0))
+const selectedTabStyle = computed(() => ({
+  transform: `translate3d(${selectedTabIndex.value * 100}%, 0, 0)`
+}))
 const isCurrentBookmarked = computed(() =>
   current.value ? bookmarkedSet.value.has(getRouteIdForItem(current.value)) : false
 )
@@ -1398,13 +1403,19 @@ watch(bookmarkedIds, (next) => {
       <div class="mx-auto flex w-[min(92vw,28rem)] items-center justify-center gap-3" style="--liquid-nav-size: 4.15rem;">
         <div class="relative h-[var(--liquid-nav-size)] flex-1 overflow-hidden rounded-[2.2rem] border border-cyan-100/45 bg-[radial-gradient(circle_at_20%_18%,rgba(255,255,255,0.46),transparent_22%),radial-gradient(circle_at_78%_30%,rgba(196,255,245,0.24),transparent_24%),radial-gradient(circle_at_50%_100%,rgba(255,255,255,0.14),transparent_52%),linear-gradient(180deg,rgba(245,250,255,0.34),rgba(164,214,230,0.2)_52%,rgba(255,255,255,0.12))] p-[0.28rem] shadow-[0_18px_48px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.56)] backdrop-blur-[28px]">
           <div class="pointer-events-none absolute inset-0 rounded-[2.2rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.2),transparent_38%,rgba(255,255,255,0.04))]" />
-          <div class="relative flex h-full items-stretch gap-1">
+          <div class="relative grid h-full grid-cols-3 items-stretch">
+            <div
+              class="pointer-events-none absolute inset-y-0 left-0 w-1/3 p-[2px] transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+              :style="selectedTabStyle"
+            >
+              <div class="h-full w-full rounded-[1.55rem] border border-cyan-100/45 bg-[radial-gradient(circle_at_30%_25%,rgba(255,255,255,0.38),transparent_42%),linear-gradient(180deg,rgba(180,255,247,0.34),rgba(122,214,255,0.2)_52%,rgba(255,255,255,0.12))] shadow-[inset_0_1px_0_rgba(255,255,255,0.58)] backdrop-blur-[24px]" />
+            </div>
             <button
               type="button"
               aria-label="Home"
-              class="relative flex h-full min-w-0 flex-1 items-center justify-center rounded-[1.55rem] px-3 transition"
+              class="relative z-10 flex h-full min-w-0 items-center justify-center rounded-[1.55rem] px-3"
               :class="viewMode === 'home'
-                ? 'border border-cyan-100/45 bg-[radial-gradient(circle_at_30%_25%,rgba(255,255,255,0.38),transparent_42%),linear-gradient(180deg,rgba(180,255,247,0.34),rgba(122,214,255,0.2)_52%,rgba(255,255,255,0.12))] text-slate-950 shadow-[0_10px_22px_rgba(0,0,0,0.14),inset_0_1px_0_rgba(255,255,255,0.58)] backdrop-blur-[24px]'
+                ? 'text-slate-950'
                 : 'text-slate-950/80 hover:bg-white/[0.1] hover:text-slate-950'"
               @click="viewMode = 'home'"
             >
@@ -1413,9 +1424,9 @@ watch(bookmarkedIds, (next) => {
             <button
               type="button"
               aria-label="Bookmarks"
-              class="relative flex h-full min-w-0 flex-1 items-center justify-center rounded-[1.55rem] px-3 transition"
+              class="relative z-10 flex h-full min-w-0 items-center justify-center rounded-[1.55rem] px-3"
               :class="viewMode === 'bookmarks'
-                ? 'border border-cyan-100/45 bg-[radial-gradient(circle_at_30%_25%,rgba(255,255,255,0.38),transparent_42%),linear-gradient(180deg,rgba(180,255,247,0.34),rgba(122,214,255,0.2)_52%,rgba(255,255,255,0.12))] text-slate-950 shadow-[0_10px_22px_rgba(0,0,0,0.14),inset_0_1px_0_rgba(255,255,255,0.58)] backdrop-blur-[24px]'
+                ? 'text-slate-950'
                 : 'text-slate-950/80 hover:bg-white/[0.1] hover:text-slate-950'"
               @click="viewMode = 'bookmarks'"
             >
@@ -1424,9 +1435,9 @@ watch(bookmarkedIds, (next) => {
             <button
               type="button"
               aria-label="About"
-              class="relative flex h-full min-w-0 flex-1 items-center justify-center rounded-[1.55rem] px-3 transition"
+              class="relative z-10 flex h-full min-w-0 items-center justify-center rounded-[1.55rem] px-3"
               :class="viewMode === 'about'
-                ? 'border border-cyan-100/45 bg-[radial-gradient(circle_at_30%_25%,rgba(255,255,255,0.38),transparent_42%),linear-gradient(180deg,rgba(180,255,247,0.34),rgba(122,214,255,0.2)_52%,rgba(255,255,255,0.12))] text-slate-950 shadow-[0_10px_22px_rgba(0,0,0,0.14),inset_0_1px_0_rgba(255,255,255,0.58)] backdrop-blur-[24px]'
+                ? 'text-slate-950'
                 : 'text-slate-950/80 hover:bg-white/[0.1] hover:text-slate-950'"
               @click="viewMode = 'about'"
             >
@@ -1550,7 +1561,31 @@ watch(bookmarkedIds, (next) => {
   overscroll-behavior-y: none;
 }
 
+button {
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 180ms ease,
+    border-color 180ms ease,
+    opacity 180ms ease,
+    box-shadow 180ms ease;
+}
+
+button:not(:disabled):active {
+  transform: scale(0.965) translateY(1px);
+}
+
 [data-content-scroller] {
   -webkit-overflow-scrolling: touch;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button {
+    transition: none;
+  }
+
+  button:not(:disabled):active {
+    transform: none;
+  }
 }
 </style>
