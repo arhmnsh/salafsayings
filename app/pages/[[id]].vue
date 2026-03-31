@@ -1455,13 +1455,13 @@ watch(bookmarkedIds, (next) => {
 
     <div
       v-if="showShareMenu && !isAboutView"
-      class="fixed right-20 top-1/2 z-30 flex -translate-y-1/2 flex-col gap-2 rounded-2xl border border-cyan-100/35 bg-[linear-gradient(180deg,rgba(245,250,255,0.28),rgba(164,214,230,0.16)_52%,rgba(255,255,255,0.08))] p-2.5 shadow-[0_18px_34px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.48)] backdrop-blur-2xl"
+      class="fixed right-20 top-1/2 z-30 flex -translate-y-1/2 flex-col gap-2 rounded-2xl border border-white/20 bg-[linear-gradient(180deg,rgba(17,24,39,0.92),rgba(15,23,42,0.88)_58%,rgba(9,14,26,0.84))] p-2.5 shadow-[0_22px_44px_rgba(0,0,0,0.34),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl"
       data-share-menu
       @click.stop
     >
       <button
         type="button"
-        class="flex items-center gap-2 rounded-xl border border-transparent px-3 py-2 text-left text-xs text-slate-950/85 transition hover:border-cyan-100/35 hover:bg-white/20"
+        class="flex items-center gap-2 rounded-xl border border-transparent px-3 py-2 text-left text-xs text-white/92 transition hover:border-white/12 hover:bg-white/10"
         @click.stop="shareCurrent()"
       >
         <Share2 class="h-4 w-4" />
@@ -1469,7 +1469,7 @@ watch(bookmarkedIds, (next) => {
       </button>
       <button
         type="button"
-        class="flex items-center gap-2 rounded-xl border border-transparent px-3 py-2 text-left text-xs text-slate-950/85 transition hover:border-cyan-100/35 hover:bg-white/20"
+        class="flex items-center gap-2 rounded-xl border border-transparent px-3 py-2 text-left text-xs text-white/92 transition hover:border-white/12 hover:bg-white/10"
         @click.stop="copyCurrent(); showShareMenu = false"
       >
         <Copy class="h-4 w-4" />
@@ -1477,7 +1477,7 @@ watch(bookmarkedIds, (next) => {
       </button>
       <button
         type="button"
-        class="flex items-center gap-2 rounded-xl border border-transparent px-3 py-2 text-left text-xs text-slate-950/85 transition hover:border-cyan-100/35 hover:bg-white/20"
+        class="flex items-center gap-2 rounded-xl border border-transparent px-3 py-2 text-left text-xs text-white/92 transition hover:border-white/12 hover:bg-white/10"
         @click.stop="shareImageCurrent()"
       >
         <Image class="h-4 w-4" />
@@ -1485,7 +1485,7 @@ watch(bookmarkedIds, (next) => {
       </button>
       <button
         type="button"
-        class="flex items-center gap-2 rounded-xl border border-transparent px-3 py-2 text-left text-xs text-slate-950/85 transition hover:border-cyan-100/35 hover:bg-white/20"
+        class="flex items-center gap-2 rounded-xl border border-transparent px-3 py-2 text-left text-xs text-white/92 transition hover:border-white/12 hover:bg-white/10"
         @click.stop="copyCurrentLink()"
       >
         <Link2 class="h-4 w-4" />
