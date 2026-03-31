@@ -1304,46 +1304,47 @@ watch(bookmarkedIds, (next) => {
         @touchend.passive="onContentTouchEnd"
         @touchcancel.passive="onContentTouchEnd"
       >
-        <section
-          v-if="isAboutView"
-          class="w-full min-h-[calc(100dvh-12rem)] rounded-3xl border border-white/20 bg-[linear-gradient(180deg,rgba(2,6,23,0.78),rgba(2,6,23,0.58))] p-7 shadow-2xl backdrop-blur-xl sm:min-h-[calc(100dvh-13.5rem)] sm:p-10"
-        >
-          <p class="font-mono text-[11px] uppercase tracking-[0.22em] text-white/50">About</p>
-          <h2 class="mt-2 font-serif text-3xl text-white sm:text-4xl">Salaf Sayings</h2>
-          <p class="mt-5 max-w-2xl text-sm leading-relaxed text-white/78 sm:text-base">
-            A focused space to read concise reminders from the Salaf with an interface designed for calm, quick reflection.
-          </p>
-          <p class="mt-8 text-xs uppercase tracking-[0.18em] text-white/55">By</p>
-          <p class="mt-2 text-lg text-white">AbdurRahaman Shah</p>
+        <div v-if="isAboutView" class="pt-3 sm:pt-4">
+          <section
+            class="w-full min-h-[calc(100dvh-12rem)] rounded-3xl border border-white/20 bg-[linear-gradient(180deg,rgba(2,6,23,0.78),rgba(2,6,23,0.58))] p-7 shadow-2xl backdrop-blur-xl sm:min-h-[calc(100dvh-13.5rem)] sm:p-10"
+          >
+            <p class="font-mono text-[11px] uppercase tracking-[0.22em] text-white/50">About</p>
+            <h2 class="mt-2 font-serif text-3xl text-white sm:text-4xl">Salaf Sayings</h2>
+            <p class="mt-5 max-w-2xl text-sm leading-relaxed text-white/78 sm:text-base">
+              A focused space to read concise reminders from the Salaf with an interface designed for calm, quick reflection.
+            </p>
+            <p class="mt-8 text-xs uppercase tracking-[0.18em] text-white/55">By</p>
+            <p class="mt-2 text-lg text-white">AbdurRahaman Shah</p>
 
-          <div class="mt-8 flex flex-col items-start gap-3 text-sm text-white/90">
-            <a
-              href="https://arhmn.sh"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="inline-flex items-center gap-2 text-amber-200 transition hover:text-amber-100"
-            >
-              <Globe class="h-4 w-4 text-amber-200/85" />
-              arhmn.sh
-            </a>
-            <a
-              href="https://x.com/arhmnsh"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="inline-flex items-center gap-2 transition hover:text-white"
-            >
-              <AtSign class="h-4 w-4 text-white/65" />
-              X / @arhmnsh
-            </a>
-            <a
-              href="mailto:hi@arhmn.sh"
-              class="inline-flex items-center gap-2 transition hover:text-white"
-            >
-              <Mail class="h-4 w-4 text-white/65" />
-              hi@arhmn.sh
-            </a>
-          </div>
-        </section>
+            <div class="mt-8 flex flex-col items-start gap-3 text-sm text-white/90">
+              <a
+                href="https://arhmn.sh"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-2 text-amber-200 transition hover:text-amber-100"
+              >
+                <Globe class="h-4 w-4 text-amber-200/85" />
+                arhmn.sh
+              </a>
+              <a
+                href="https://x.com/arhmnsh"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-2 transition hover:text-white"
+              >
+                <AtSign class="h-4 w-4 text-white/65" />
+                X / @arhmnsh
+              </a>
+              <a
+                href="mailto:hi@arhmn.sh"
+                class="inline-flex items-center gap-2 transition hover:text-white"
+              >
+                <Mail class="h-4 w-4 text-white/65" />
+                hi@arhmn.sh
+              </a>
+            </div>
+          </section>
+        </div>
 
         <div class="pt-3 sm:pt-4" :class="cardMotionClass" :style="cardStyle">
           <article
