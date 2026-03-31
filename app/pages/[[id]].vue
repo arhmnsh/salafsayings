@@ -24,6 +24,13 @@ type QueryToken = {
 }
 type ViewMode = 'home' | 'bookmarks' | 'about'
 const tabModes: ViewMode[] = ['home', 'bookmarks', 'about']
+const INSTALL_DISMISS_UNTIL_KEY = 'salafsayings-install-dismiss-until'
+const INSTALL_DISMISS_MS = 7 * 24 * 60 * 60 * 1000
+const installPromptVisible = ref(false)
+const installPromptEvent = ref<any>(null)
+const isIosInstallFlow = ref(false)
+const isInstalledPwa = ref(false)
+let installPromptTimer: ReturnType<typeof setTimeout> | null = null
 
 const normalizeTagText = (value: string) =>
   value
@@ -265,6 +272,68 @@ const currentPublicUrl = computed(() => {
 const truncateForMeta = (value: string, maxLength = 220) => {
   if (value.length <= maxLength) return value
   return `${value.slice(0, maxLength - 1).trimEnd()}…`
+}
+
+const detectIosInstallFlow = () => {
+  if (!import.meta.client) return false
+  const ua = navigator.userAgent || ''
+  return /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+}
+
+const detectStandalone = () => {
+  if (!import.meta.client) return false
+  return (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    window.matchMedia('(display-mode: fullscreen)').matches ||
+    (window.navigator as any).standalone === true
+  )
+}
+
+const isInstallPromptDismissed = () => {
+  if (!import.meta.client) return false
+  try {
+    const raw = localStorage.getItem(INSTALL_DISMISS_UNTIL_KEY)
+    const until = raw ? Number(raw) : 0
+    return Number.isFinite(until) && until > Date.now()
+  } catch {
+    return false
+  }
+}
+
+const dismissInstallPrompt = () => {
+  installPromptVisible.value = false
+  try {
+    localStorage.setItem(INSTALL_DISMISS_UNTIL_KEY, String(Date.now() + INSTALL_DISMISS_MS))
+  } catch {
+    // ignore storage failures
+  }
+}
+
+const refreshInstallPromptVisibility = () => {
+  if (!import.meta.client) return
+  isInstalledPwa.value = detectStandalone()
+  if (isInstalledPwa.value || isInstallPromptDismissed()) {
+    installPromptVisible.value = false
+    return
+  }
+  installPromptVisible.value = !!installPromptEvent.value || isIosInstallFlow.value
+}
+
+const showInstallPrompt = async () => {
+  const event = installPromptEvent.value
+  if (!event) return
+  try {
+    installPromptEvent.value = null
+    await event.prompt()
+    const choice = await event.userChoice
+    if (choice?.outcome === 'accepted') {
+      installPromptVisible.value = false
+      return
+    }
+  } catch {
+    // ignore prompt errors and fall through to dismissal cooldown
+  }
+  dismissInstallPrompt()
 }
 
 const seoTitle = computed(() => {
@@ -1082,6 +1151,9 @@ watch(
 
 onMounted(() => {
   lockViewportScroll()
+  isIosInstallFlow.value = detectIosInstallFlow()
+  isInstalledPwa.value = detectStandalone()
+
   const storedBookmarks = localStorage.getItem('salafsayings-bookmarks')
   if (storedBookmarks) {
     try {
@@ -1107,9 +1179,32 @@ onMounted(() => {
     if (event.key === 'ArrowDown' || event.key === 'j') move(1)
     if (event.key === 'ArrowUp' || event.key === 'k') move(-1)
   }
+  const handleBeforeInstallPrompt = (event: Event) => {
+    event.preventDefault()
+    installPromptEvent.value = event
+    refreshInstallPromptVisibility()
+  }
+  const handleAppInstalled = () => {
+    isInstalledPwa.value = true
+    installPromptVisible.value = false
+    installPromptEvent.value = null
+  }
+
+  installPromptTimer = setTimeout(() => {
+    refreshInstallPromptVisibility()
+  }, 2200)
+
   window.addEventListener('keydown', handler)
+  window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt as EventListener)
+  window.addEventListener('appinstalled', handleAppInstalled)
   onUnmounted(() => {
     window.removeEventListener('keydown', handler)
+    window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt as EventListener)
+    window.removeEventListener('appinstalled', handleAppInstalled)
+    if (installPromptTimer) {
+      clearTimeout(installPromptTimer)
+      installPromptTimer = null
+    }
     if (wheelResetTimer.value) {
       clearTimeout(wheelResetTimer.value)
       wheelResetTimer.value = null
@@ -1399,6 +1494,50 @@ watch(bookmarkedIds, (next) => {
     >
       {{ copied ? 'Copied' : linkCopied ? 'Link copied' : imageShared ? 'Image ready to share' : shared ? 'Shared' : shareError }}
     </div>
+
+    <transition
+      enter-active-class="transition duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+      enter-from-class="translate-y-3 opacity-0"
+      enter-to-class="translate-y-0 opacity-100"
+      leave-active-class="transition duration-200 ease-in"
+      leave-from-class="translate-y-0 opacity-100"
+      leave-to-class="translate-y-2 opacity-0"
+    >
+      <aside
+        v-if="installPromptVisible && !showSearchPopup"
+        class="fixed inset-x-0 bottom-24 z-40 px-5 sm:px-8"
+        role="dialog"
+        aria-live="polite"
+      >
+        <div class="mx-auto flex max-w-xl items-end justify-between gap-4 rounded-[1.8rem] border border-cyan-100/35 bg-[radial-gradient(circle_at_18%_18%,rgba(255,255,255,0.32),transparent_28%),linear-gradient(180deg,rgba(245,250,255,0.24),rgba(164,214,230,0.14)_52%,rgba(255,255,255,0.08))] px-4 py-3 shadow-[0_18px_38px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.42)] backdrop-blur-2xl">
+          <div class="min-w-0">
+            <p class="font-mono text-[11px] uppercase tracking-[0.2em] text-white/52">Install App</p>
+            <p class="mt-1 text-sm text-white/88 sm:text-[15px]">
+              {{ isIosInstallFlow
+                ? 'Open Share in Safari, then tap Add to Home Screen.'
+                : 'Install Salaf Sayings for quicker access and an app-like experience.' }}
+            </p>
+          </div>
+          <div class="flex shrink-0 items-center gap-2">
+            <button
+              v-if="!isIosInstallFlow && installPromptEvent"
+              type="button"
+              class="rounded-full border border-cyan-100/40 bg-white/12 px-4 py-2 text-sm text-white/90 backdrop-blur-xl"
+              @click="showInstallPrompt"
+            >
+              Install
+            </button>
+            <button
+              type="button"
+              class="rounded-full border border-white/15 bg-white/[0.05] px-4 py-2 text-sm text-white/72 backdrop-blur-xl"
+              @click="dismissInstallPrompt"
+            >
+              Not now
+            </button>
+          </div>
+        </div>
+      </aside>
+    </transition>
 
     <nav class="fixed inset-x-0 bottom-4 z-40" :inert="showSearchPopup">
       <div class="mx-auto flex w-[min(92vw,28rem)] items-center justify-center gap-3" style="--liquid-nav-size: 4.15rem;">
