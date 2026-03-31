@@ -1159,7 +1159,7 @@ watch(bookmarkedIds, (next) => {
           <div>
             <p class="font-mono text-[11px] uppercase tracking-[0.24em] text-white/78 sm:text-xs">Salaf Sayings</p>
           </div>
-          <div class="relative flex items-center">
+          <div v-if="!isAboutView" class="relative flex items-center">
             <div class="min-w-[5.75rem] rounded-full border border-white/20 bg-white/8 px-3 py-1 text-center font-mono text-[11px] tabular-nums text-white/82 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] sm:text-xs">
               {{ progressLabel }}
             </div>
@@ -1207,7 +1207,7 @@ watch(bookmarkedIds, (next) => {
       >
         <section
           v-if="isAboutView"
-          class="w-full min-h-[calc(100dvh-12rem)] bg-[linear-gradient(180deg,rgba(2,6,23,0.72),rgba(2,6,23,0.52))] px-6 py-8 sm:min-h-[calc(100dvh-13.5rem)] sm:px-10 sm:py-10"
+          class="w-full min-h-[calc(100dvh-12rem)] rounded-3xl border border-white/20 bg-[linear-gradient(180deg,rgba(2,6,23,0.78),rgba(2,6,23,0.58))] p-7 shadow-2xl backdrop-blur-xl sm:min-h-[calc(100dvh-13.5rem)] sm:p-10"
         >
           <p class="font-mono text-[11px] uppercase tracking-[0.22em] text-white/50">About</p>
           <h2 class="mt-2 font-serif text-3xl text-white sm:text-4xl">Salaf Sayings</h2>
@@ -1282,10 +1282,16 @@ watch(bookmarkedIds, (next) => {
             </div>
           </article>
 
-          <div v-else-if="!isAboutView" key="empty" class="w-full border border-white/15 bg-black/30 px-6 py-16 text-center text-white/72">
-            {{ viewMode === 'bookmarks'
-              ? 'No bookmarked sayings yet. Save a post from Home to find it here.'
-              : 'No sayings found with current filters.' }}
+          <div
+            v-else-if="!isAboutView"
+            key="empty"
+            class="flex w-full min-h-[calc(100dvh-12rem)] items-center justify-center rounded-3xl border border-white/20 bg-[linear-gradient(180deg,rgba(2,6,23,0.74),rgba(2,6,23,0.56))] p-7 text-center shadow-2xl backdrop-blur-xl sm:min-h-[calc(100dvh-13.5rem)] sm:p-10"
+          >
+            <p class="max-w-xl text-lg leading-relaxed text-white/70 sm:text-[1.45rem]">
+              {{ viewMode === 'bookmarks'
+                ? 'No bookmarked sayings yet. Save a post from Home to find it here.'
+                : 'No sayings found with current filters.' }}
+            </p>
           </div>
         </div>
       </div>
