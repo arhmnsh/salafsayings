@@ -1653,7 +1653,7 @@ watch(bookmarkedIds, (next) => {
             v-model="draftInput"
             type="text"
             placeholder="Search text, or type #tag"
-            class="min-w-[170px] flex-1 bg-transparent text-sm text-white placeholder:text-white/45 focus:outline-none"
+            class="min-w-[170px] flex-1 bg-transparent text-base text-white placeholder:text-white/45 focus:outline-none sm:text-sm"
             @keydown="onSearchInputKeydown"
           />
         </div>
