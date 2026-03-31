@@ -70,11 +70,26 @@ const activeFilterItems = computed(() =>
     .filter(item => item.token.type !== 'or')
 )
 const isTagDraft = computed(() => draftInput.value.trim().startsWith('#'))
+const availableTags = computed(() => {
+  const counts = new Map<string, { name: string, count: number, normalized: string }>()
+  filteredSayings.value.forEach((item: any) => {
+    ;(item.topics || []).forEach((topic: string) => {
+      const normalized = normalizeTagText(topic)
+      const existing = counts.get(normalized)
+      if (existing) {
+        existing.count += 1
+        return
+      }
+      counts.set(normalized, { name: topic, count: 1, normalized })
+    })
+  })
+  return Array.from(counts.values()).sort((a, b) => a.name.localeCompare(b.name))
+})
 const matchingTags = computed(() => {
   if (!isTagDraft.value) return []
   const q = normalizeTagText(draftInput.value.trim().slice(1))
   if (!q) return []
-  return allTags.value
+  return availableTags.value
     .filter(tag => !selectedTagSet.value.has(tag.normalized))
     .filter(tag => tag.normalized.includes(q))
     .slice(0, 8)
@@ -1678,7 +1693,7 @@ watch(bookmarkedIds, (next) => {
         </div>
         <div class="mt-3 flex max-h-48 flex-wrap gap-2 overflow-y-auto pr-1">
           <button
-            v-for="tag in allTags"
+            v-for="tag in availableTags"
             :key="tag.name"
             type="button"
             class="inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs transition"
