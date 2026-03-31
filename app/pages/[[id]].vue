@@ -1255,10 +1255,13 @@ watch(bookmarkedIds, (next) => {
             <p class="font-mono text-[11px] uppercase tracking-[0.24em] text-white/78 sm:text-xs">Salaf Sayings</p>
           </div>
           <div class="relative flex items-center">
-            <div class="min-w-[5.75rem] rounded-full border border-white/20 bg-white/8 px-3 py-1 text-center font-mono text-[11px] tabular-nums text-white/82 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] sm:text-xs">
-              <span v-if="!isAboutView">{{ progressLabel }}</span>
-              <span v-else class="block opacity-0" aria-hidden="true">0 / 0</span>
+            <div
+              v-if="!isAboutView"
+              class="min-w-[5.75rem] rounded-full border border-white/20 bg-white/8 px-3 py-1 text-center font-mono text-[11px] tabular-nums text-white/82 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] sm:text-xs"
+            >
+              {{ progressLabel }}
             </div>
+            <div v-else class="h-[2rem] min-w-[5.75rem]" aria-hidden="true" />
           </div>
         </header>
         <div
