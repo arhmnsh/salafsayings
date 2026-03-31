@@ -1306,7 +1306,7 @@ watch(bookmarkedIds, (next) => {
       >
         <div v-if="isAboutView" class="pt-3 sm:pt-4">
           <section
-            class="w-full min-h-[calc(100dvh-12rem)] rounded-3xl border border-white/20 bg-[linear-gradient(180deg,rgba(2,6,23,0.78),rgba(2,6,23,0.58))] p-7 shadow-2xl backdrop-blur-xl sm:min-h-[calc(100dvh-13.5rem)] sm:p-10"
+            class="w-full min-h-[calc(100dvh-12.75rem)] px-7 py-8 sm:min-h-[calc(100dvh-14.5rem)] sm:px-10 sm:py-10"
           >
             <p class="font-mono text-[11px] uppercase tracking-[0.22em] text-white/50">About</p>
             <h2 class="mt-2 font-serif text-3xl text-white sm:text-4xl">Salaf Sayings</h2>
@@ -1385,7 +1385,7 @@ watch(bookmarkedIds, (next) => {
           <div
             v-else-if="!isAboutView"
             key="empty"
-            class="flex w-full min-h-[calc(100dvh-12rem)] items-center justify-center rounded-3xl border border-white/20 bg-[linear-gradient(180deg,rgba(2,6,23,0.74),rgba(2,6,23,0.56))] p-7 text-center shadow-2xl backdrop-blur-xl sm:min-h-[calc(100dvh-13.5rem)] sm:p-10"
+            class="flex w-full min-h-[calc(100dvh-12rem)] items-center justify-center px-7 py-12 text-center sm:min-h-[calc(100dvh-13.5rem)] sm:px-10"
           >
             <p class="max-w-xl text-lg leading-relaxed text-white/70 sm:text-[1.45rem]">
               {{ viewMode === 'bookmarks'
