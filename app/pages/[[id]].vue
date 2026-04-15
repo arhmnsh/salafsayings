@@ -2,6 +2,7 @@
 import { AlertTriangle, AtSign, Bookmark, BookMarked, ChevronDown, ChevronUp, Copy, Globe, Hash, Home, Image, Info, Link2, Mail, Search, Share2, Shuffle } from 'lucide-vue-next'
 import QRCode from 'qrcode'
 import { buildClipboardText, buildQuoteUrl, buildSharePayload, canUseNativeFileShare, canUseNativeShare, copyTextWithFallback, isShareAbortError } from '~/utils/share'
+import { computeShareImageLayout, SHARE_IMAGE_DIMENSIONS } from '~/utils/share-image'
 
 definePageMeta({ layout: false, key: 'salafsayings-feed' })
 const route = useRoute()
@@ -871,11 +872,44 @@ const drawLinkIcon = (ctx: CanvasRenderingContext2D, x: number, y: number, size:
 
 const renderShareImageBlob = async () => {
   if (!current.value || !import.meta.client) return null
+  const dims = SHARE_IMAGE_DIMENSIONS
   const canvas = document.createElement('canvas')
-  canvas.width = 1080
-  canvas.height = 1350
+  canvas.width = dims.width
   const ctx = canvas.getContext('2d')
   if (!ctx) return null
+
+  const cardW = dims.width - dims.cardX * 2
+  const contentWidth = cardW - dims.cardPaddingX * 2
+
+  ctx.font = '400 34px Inter, system-ui, sans-serif'
+  const introLines = current.value.intro
+    ? wrapCanvasText(ctx, current.value.intro, contentWidth)
+    : []
+
+  ctx.font = '500 60px "IBM Plex Serif", Georgia, serif'
+  const quoteLines = wrapCanvasText(ctx, `“${current.value.quote}”`, contentWidth)
+
+  ctx.font = '600 40px Inter, system-ui, sans-serif'
+  const authorLines = current.value.author
+    ? wrapCanvasText(ctx, current.value.author.toUpperCase(), Math.max(320, contentWidth - dims.qrSize - dims.sourceGapToQr))
+    : []
+
+  const sourceUrl = getPublicQuoteUrl(current.value)
+  const sourceTextMaxWidth = Math.max(
+    dims.minSourceWidth,
+    cardW - dims.cardPaddingX * 2 - dims.qrSize - dims.sourceGapToQr
+  )
+  ctx.font = '400 24px Inter, system-ui, sans-serif'
+  const sourceLines = wrapCanvasText(ctx, sourceUrl, sourceTextMaxWidth)
+
+  const layout = computeShareImageLayout({
+    introLineCount: introLines.length,
+    quoteLineCount: quoteLines.length,
+    authorLineCount: authorLines.length,
+    sourceLineCount: sourceLines.length
+  })
+
+  canvas.height = layout.canvasHeight
 
   const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height)
   gradient.addColorStop(0, '#060B1A')
@@ -895,11 +929,10 @@ const renderShareImageBlob = async () => {
   ctx.fill()
   ctx.globalAlpha = 1
 
-  const cardX = 80
-  const cardY = 120
-  const cardW = 920
-  const cardH = 1040
-  drawRoundedRect(ctx, cardX, cardY, cardW, cardH, 44)
+  const cardX = dims.cardX
+  const cardY = dims.cardY
+  const cardH = layout.cardHeight
+  drawRoundedRect(ctx, cardX, cardY, cardW, cardH, dims.cardRadius)
   ctx.fillStyle = 'rgba(2, 6, 23, 0.78)'
   ctx.fill()
   ctx.strokeStyle = 'rgba(255, 255, 255, 0.22)'
@@ -908,48 +941,48 @@ const renderShareImageBlob = async () => {
 
   ctx.fillStyle = 'rgba(255,255,255,0.72)'
   ctx.font = '500 30px Inter, system-ui, sans-serif'
-  ctx.fillText('SALAF SAYINGS', cardX + 56, cardY + 72)
+  ctx.fillText('SALAF SAYINGS', cardX + dims.cardPaddingX, cardY + dims.cardPaddingTop)
 
-  let cursorY = cardY + 150
-  if (current.value.intro) {
+  let cursorY = cardY + dims.cardPaddingTop + dims.introTopGap
+  if (introLines.length) {
     ctx.fillStyle = 'rgba(255,255,255,0.72)'
     ctx.font = '400 34px Inter, system-ui, sans-serif'
-    const introLines = wrapCanvasText(ctx, current.value.intro, cardW - 112)
-    for (const line of introLines.slice(0, 5)) {
-      ctx.fillText(line, cardX + 56, cursorY)
-      cursorY += 46
+    for (const line of introLines) {
+      ctx.fillText(line, cardX + dims.cardPaddingX, cursorY)
+      cursorY += dims.introLineHeight
     }
-    cursorY += 24
+    cursorY += dims.introGapAfter
   }
 
   ctx.fillStyle = '#F8FAFC'
   ctx.font = '500 60px "IBM Plex Serif", Georgia, serif'
-  const quoteLines = wrapCanvasText(ctx, `“${current.value.quote}”`, cardW - 112)
-  for (const line of quoteLines.slice(0, 10)) {
-    ctx.fillText(line, cardX + 56, cursorY)
-    cursorY += 76
+  for (const line of quoteLines) {
+    ctx.fillText(line, cardX + dims.cardPaddingX, cursorY)
+    cursorY += dims.quoteLineHeight
   }
 
-  cursorY = Math.min(cursorY + 12, cardY + cardH - 240)
+  cursorY += dims.dividerGapBefore
   ctx.strokeStyle = 'rgba(255,255,255,0.2)'
   ctx.lineWidth = 1
   ctx.beginPath()
-  ctx.moveTo(cardX + 56, cursorY)
-  ctx.lineTo(cardX + cardW - 56, cursorY)
+  ctx.moveTo(cardX + dims.cardPaddingX, cursorY)
+  ctx.lineTo(cardX + cardW - dims.cardPaddingX, cursorY)
   ctx.stroke()
 
-  cursorY += 54
-  if (current.value.author) {
+  cursorY += dims.dividerGapAfter
+  if (authorLines.length) {
     ctx.fillStyle = '#FDE68A'
     ctx.font = '600 40px Inter, system-ui, sans-serif'
-    ctx.fillText(current.value.author.toUpperCase(), cardX + 56, cursorY)
-    cursorY += 58
+    for (const line of authorLines) {
+      ctx.fillText(line, cardX + dims.cardPaddingX, cursorY)
+      cursorY += dims.authorLineHeight
+    }
+    cursorY += dims.sectionGapAfterAuthor
   }
 
-  const sourceUrl = getPublicQuoteUrl(current.value)
-  const qrSize = 132
-  const qrBoxX = cardX + cardW - 56 - qrSize
-  const qrBoxY = cardY + cardH - 56 - qrSize
+  const qrSize = dims.qrSize
+  const qrBoxX = cardX + cardW - dims.qrBoxInset - qrSize
+  const qrBoxY = layout.qrBoxY
 
   try {
     const createFn = (QRCode as any)?.create || (QRCode as any)?.default?.create
@@ -963,7 +996,7 @@ const renderShareImageBlob = async () => {
     const renderedSize = moduleSize * moduleCount
     const qrOffset = Math.floor((qrSize - renderedSize) / 2)
 
-    drawRoundedRect(ctx, qrBoxX - 8, qrBoxY - 8, qrSize + 16, qrSize + 16, 14)
+    drawRoundedRect(ctx, qrBoxX - dims.qrFrameInset, qrBoxY - dims.qrFrameInset, qrSize + dims.qrFrameInset * 2, qrSize + dims.qrFrameInset * 2, 14)
     ctx.fillStyle = 'rgba(255,255,255,0.92)'
     ctx.fill()
 
@@ -984,7 +1017,7 @@ const renderShareImageBlob = async () => {
     }
   } catch (error) {
     console.warn('QR rendering failed', error)
-    drawRoundedRect(ctx, qrBoxX - 8, qrBoxY - 8, qrSize + 16, qrSize + 16, 14)
+    drawRoundedRect(ctx, qrBoxX - dims.qrFrameInset, qrBoxY - dims.qrFrameInset, qrSize + dims.qrFrameInset * 2, qrSize + dims.qrFrameInset * 2, 14)
     ctx.fillStyle = 'rgba(255,255,255,0.22)'
     ctx.fill()
     ctx.fillStyle = 'rgba(255,255,255,0.85)'
@@ -992,17 +1025,15 @@ const renderShareImageBlob = async () => {
     ctx.fillText('QR', qrBoxX + 40, qrBoxY + 74)
   }
 
-  const sourceTextX = cardX + 56
+  const sourceTextX = cardX + dims.cardPaddingX
   let sourceTextY = qrBoxY + 6
-  const sourceTextMaxWidth = Math.max(300, qrBoxX - sourceTextX - 24)
-  drawLinkIcon(ctx, sourceTextX + 12, sourceTextY + 14, 20)
+  drawLinkIcon(ctx, sourceTextX + dims.sourceIconOffsetX, sourceTextY + dims.sourceIconOffsetY, 20)
 
   ctx.fillStyle = 'rgba(255,255,255,0.82)'
   ctx.font = '400 24px Inter, system-ui, sans-serif'
-  const sourceLines = wrapCanvasText(ctx, sourceUrl, sourceTextMaxWidth)
-  for (const line of sourceLines.slice(0, 4)) {
-    ctx.fillText(line, sourceTextX + 30, sourceTextY + 20)
-    sourceTextY += 34
+  for (const line of sourceLines.slice(0, layout.sourceLineCount)) {
+    ctx.fillText(line, sourceTextX + dims.sourceTextOffsetX, sourceTextY + dims.sourceTextOffsetY)
+    sourceTextY += dims.sourceLineHeight
   }
 
   return await new Promise<Blob | null>((resolve) => {
